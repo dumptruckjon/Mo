@@ -20,11 +20,10 @@ const IPHONE = {
     "(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
 };
 
-let server, browser, context, page, engine;
+let server, browser, context, page, engine, baseURL;
 const pageErrors = [];
 
 before(async () => {
-  let baseURL;
   ({ server, baseURL } = await startServer());
   ({ browser, engine } = await launchMobileBrowser());
   // WebKit rejects some emulation knobs; keep only what it accepts.
@@ -34,9 +33,28 @@ before(async () => {
   context = await browser.newContext(opts);
   page = await context.newPage();
   page.on("pageerror", (e) => pageErrors.push(String(e)));
-  await page.goto(baseURL, { waitUntil: "load" });
+  // Festival features live at festival.html (index.html is the quiz gate).
+  await page.goto(baseURL + "festival.html", { waitUntil: "load" });
   // eslint-disable-next-line no-console
   console.log(`[mobile] engine=${engine} url=${baseURL}`);
+});
+
+// The quiz (front door) must also fit small screens.
+test("quiz page has no horizontal overflow (390px and 320px)", async () => {
+  const qp = await context.newPage();
+  try {
+    for (const w of [390, 320]) {
+      await qp.setViewportSize({ width: w, height: 700 });
+      await qp.goto(baseURL, { waitUntil: "load" });
+      const overflow = await qp.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+      );
+      assert.ok(overflow <= 1, `quiz overflows by ${overflow}px at ${w}px`);
+      assert.ok(await qp.locator("#quiz-options button").count() >= 2, "quiz options should render");
+    }
+  } finally {
+    await qp.close();
+  }
 });
 
 after(async () => {

@@ -3,87 +3,45 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Mo's Little Festival 🏮</title>
-  <meta name="description" content="A funny, sweet little festival made with love for Mo." />
-  <!-- iOS Safari: nice full-screen feel if added to the home screen. -->
+  <title>A Quiz for Mo 🔒</title>
+  <meta name="description" content="Answer 3 questions to unlock Mo's little festival." />
+  <!-- PWA: installable to the home screen, works offline. -->
+  <link rel="manifest" href="manifest.webmanifest?v=__BUILD__" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Hi Mo" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#d4001a" />
-  <!-- PWA: installable to the home screen, works offline. -->
-  <link rel="manifest" href="manifest.webmanifest?v=__BUILD__" />
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <link rel="stylesheet" href="styles/main.css?v=__BUILD__" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏮</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔒</text></svg>" />
 </head>
 <body>
-  <!-- Fireworks + candy render here, behind everything. -->
-  <canvas id="fireworks" aria-hidden="true"></canvas>
-  <!-- Gently drifting Chinese food. Populated by JS. -->
+  <!-- Drifting Chinese food (shared festive backdrop). Populated by JS. -->
   <div id="food-bg" aria-hidden="true"></div>
 
   <main class="page">
     <header class="hero">
-      <div class="lanterns" aria-hidden="true">🏮 🧧 🏮</div>
+      <div class="lanterns" aria-hidden="true">🔒 💕 🔒</div>
       <h1 class="hero__title">Hi&nbsp;Mo!</h1>
-      <p class="hero__subtitle">A tiny festival, just for you. 准备好了吗？</p>
+      <p class="hero__subtitle">Answer all 3 to unlock your surprise…</p>
     </header>
 
-    <!-- A new little note every day. -->
-    <section class="card daily" aria-labelledby="daily-h">
-      <h2 id="daily-h">💌 Today's note</h2>
-      <p class="daily__text" id="daily-note">…</p>
+    <section class="card quiz" aria-labelledby="quiz-h">
+      <h2 id="quiz-h" class="quiz__progress" aria-live="polite">Question 1 of 3</h2>
+      <div class="quiz__dots" id="quiz-dots" aria-hidden="true"></div>
+
+      <p class="quiz__question" id="quiz-question">…</p>
+      <div class="quiz__options" id="quiz-options" role="group" aria-label="Answers"></div>
+
+      <p class="quiz__feedback" id="quiz-feedback" aria-live="assertive"></p>
     </section>
 
-    <section class="stage" aria-live="polite">
-      <!-- The big countdown number. -->
-      <div class="countdown" id="countdown">5</div>
-
-      <!-- Revealed when the countdown hits zero. A random joke is filled in by JS. -->
-      <div class="joke" id="joke" hidden>
-        <p class="joke__zh" id="joke-zh" lang="zh-Hans"></p>
-        <p class="joke__punch" id="joke-punch" lang="zh-Hans"></p>
-        <p class="joke__pinyin" id="joke-pinyin"></p>
-        <p class="joke__en" id="joke-en"></p>
-      </div>
-    </section>
-
-    <button class="btn" id="restart" type="button" hidden>再来一次 · Again 🎆</button>
-
-    <!-- Fortune cookie: tap to crack open a sweet note. -->
-    <section class="card fortune" aria-labelledby="fortune-h">
-      <h2 id="fortune-h">Crack open a fortune 🥠</h2>
-      <button class="cookie" id="fortune-cookie" type="button" aria-describedby="fortune-text">🥠</button>
-      <p class="fortune__text" id="fortune-text">Tap the cookie…</p>
-    </section>
-
-    <!-- Garden: tap the soil to grow flowers for Mo. -->
-    <section class="card garden" aria-labelledby="garden-h">
-      <h2 id="garden-h">Grow a garden for Mo 🌷</h2>
-      <p class="garden__hint">Tap the soil to plant a flower.</p>
-      <div class="soil" id="garden" role="button" tabindex="0"
-           aria-label="Garden soil — tap or press Enter to plant a flower"></div>
-      <p class="garden__count">🌸 <strong id="flower-count">0</strong> flowers grown for Mo</p>
-    </section>
-
-    <!-- Lucky red envelopes: tap one to reveal a redeemable treat coupon. -->
-    <section class="card envelopes" aria-labelledby="env-h">
-      <h2 id="env-h">Pick a lucky red envelope 🧧</h2>
-      <div class="envelope-row" id="envelopes">
-        <button class="envelope" type="button" aria-label="Open a red envelope">🧧</button>
-        <button class="envelope" type="button" aria-label="Open a red envelope">🧧</button>
-        <button class="envelope" type="button" aria-label="Open a red envelope">🧧</button>
-      </div>
-      <p class="envelope__text" id="envelope-text">Tap an envelope to open it…</p>
-    </section>
-
-    <!-- Sweet memory match game. -->
-    <section class="card memory" aria-labelledby="mem-h">
-      <h2 id="mem-h">Match the treats 🀄</h2>
-      <p class="memory__status" id="memory-status">Find all the pairs!</p>
-      <div class="memory-grid" id="memory-grid"></div>
-      <button class="btn btn--small" id="memory-new" type="button">New game 🔄</button>
+    <!-- Revealed only at 3/3. -->
+    <section class="card prize" id="quiz-prize" hidden aria-labelledby="prize-h">
+      <h2 id="prize-h">🎉 You did it! 🎉</h2>
+      <p class="prize__text">100% — of course. Here's your surprise:</p>
+      <a class="btn prize__link" id="prize-link" href="festival.html">Enter the festival 🏮</a>
     </section>
 
     <footer class="footer">
@@ -93,6 +51,6 @@
 
   <!-- __BUILD__ is rewritten to the commit SHA at deploy time for cache-busting. -->
   <script src="scripts/content.js?v=__BUILD__" defer></script>
-  <script src="scripts/main.js?v=__BUILD__" defer></script>
+  <script src="scripts/quiz.js?v=__BUILD__" defer></script>
 </body>
 </html>

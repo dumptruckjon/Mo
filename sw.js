@@ -9,8 +9,10 @@ const CACHE = `mo-${VERSION}`;
 const CORE = [
   "./",
   "./index.html",
+  "./festival.html",
   "./styles/main.css",
   "./scripts/content.js",
+  "./scripts/quiz.js",
   "./scripts/main.js",
   "./manifest.webmanifest",
 ];

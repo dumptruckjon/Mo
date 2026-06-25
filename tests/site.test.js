@@ -13,23 +13,35 @@ const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
 const content = require("../scripts/content.js");
 
 test("core files exist", () => {
-  for (const f of ["index.html", "styles/main.css", "scripts/main.js", "scripts/content.js"]) {
+  for (const f of [
+    "index.html", "festival.html", "styles/main.css",
+    "scripts/main.js", "scripts/quiz.js", "scripts/content.js",
+  ]) {
     assert.ok(fs.existsSync(path.join(root, f)), `missing ${f}`);
   }
 });
 
-test("index.html references styles, content, and main script", () => {
+test("the quiz (index) links styles, content, and quiz script", () => {
   const html = read("index.html");
+  assert.match(html, /styles\/main\.css/, "stylesheet not linked");
+  assert.match(html, /scripts\/content\.js/, "content.js not linked");
+  assert.match(html, /scripts\/quiz\.js/, "quiz.js not linked");
+});
+
+test("the festival page links styles, content, and main script", () => {
+  const html = read("festival.html");
   assert.match(html, /styles\/main\.css/, "stylesheet not linked");
   assert.match(html, /scripts\/content\.js/, "content.js not linked");
   assert.match(html, /scripts\/main\.js/, "main.js not linked");
 });
 
-test("assets are cache-busted (version query) so browsers fetch fresh files", () => {
-  const html = read("index.html");
-  assert.match(html, /styles\/main\.css\?v=/, "css not cache-busted");
-  assert.match(html, /scripts\/content\.js\?v=/, "content.js not cache-busted");
-  assert.match(html, /scripts\/main\.js\?v=/, "main.js not cache-busted");
+test("assets are cache-busted (version query) on both pages", () => {
+  const idx = read("index.html");
+  assert.match(idx, /styles\/main\.css\?v=/, "quiz css not cache-busted");
+  assert.match(idx, /scripts\/content\.js\?v=/, "quiz content.js not cache-busted");
+  assert.match(idx, /scripts\/quiz\.js\?v=/, "quiz.js not cache-busted");
+  const fest = read("festival.html");
+  assert.match(fest, /scripts\/main\.js\?v=/, "festival main.js not cache-busted");
 });
 
 test("feature inits are isolated so one failure can't break the others", () => {
@@ -37,8 +49,17 @@ test("feature inits are isolated so one failure can't break the others", () => {
   assert.match(js, /try\s*\{\s*init\(\)/, "inits should run inside try/catch");
 });
 
-test("index.html has all required UI hooks", () => {
+test("the quiz page has its required UI hooks", () => {
   const html = read("index.html");
+  for (const id of ['id="quiz-question"', 'id="quiz-options"', 'id="quiz-feedback"',
+    'id="quiz-prize"', 'id="prize-link"', 'id="quiz-h"']) {
+    assert.ok(html.includes(id), `quiz missing element ${id}`);
+  }
+  assert.match(html, /href="festival\.html"/, "prize must link to the festival");
+});
+
+test("the festival page has all required UI hooks", () => {
+  const html = read("festival.html");
   const ids = [
     'id="countdown"', 'id="joke"', 'id="restart"', 'id="fireworks"',
     'id="food-bg"', 'id="daily-note"',
@@ -49,6 +70,18 @@ test("index.html has all required UI hooks", () => {
     'id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"',
   ];
   for (const id of ids) assert.ok(html.includes(id), `missing element ${id}`);
+});
+
+test("the quiz has 3 questions with the expected correct answers", () => {
+  assert.ok(Array.isArray(content.QUIZ) && content.QUIZ.length === 3, "expected 3 quiz questions");
+  for (const item of content.QUIZ) {
+    assert.ok(item.q && item.q.length > 0, "question text missing");
+    assert.ok(Array.isArray(item.options) && item.options.length >= 3, "need >= 3 options");
+    assert.ok(item.options.includes(item.answer), "the correct answer must be one of the options");
+  }
+  assert.equal(content.QUIZ[0].answer, "Mo");
+  assert.equal(content.QUIZ[1].answer, "Pickin' and fartin'");
+  assert.equal(content.QUIZ[2].answer, "LooAyi gushi");
 });
 
 // ---------- Content module ----------
@@ -111,9 +144,12 @@ test("PWA: manifest, icons, service worker are wired up", () => {
   const sw = read("sw.js");
   assert.match(sw, /addEventListener\(\s*["']fetch["']/, "SW needs a fetch handler");
   assert.match(sw, /addEventListener\(\s*["']install["']/, "SW needs an install handler");
+  // SW precaches both pages so either entry works offline.
+  assert.match(sw, /festival\.html/, "SW should precache festival.html");
 
-  const js = read("scripts/main.js");
-  assert.match(js, /serviceWorker\.register/, "main.js should register the SW");
+  // The front door (quiz) and the festival both register the SW.
+  assert.match(read("scripts/quiz.js"), /serviceWorker\.register/, "quiz.js should register the SW");
+  assert.match(read("scripts/main.js"), /serviceWorker\.register/, "main.js should register the SW");
 });
 
 // ---------- Behavior wiring (main.js) ----------

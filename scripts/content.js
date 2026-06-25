@@ -106,6 +106,27 @@
       "Thanks for being my favorite person, today and always.",
       "I'd cross any room just to get to you.",
     ],
+
+    // Front-door quiz. Pass all 3 (any wrong answer restarts) to unlock the
+    // festival. `answer` must exactly match one of `options`. Options are
+    // shuffled at render time. TODO (Jon): edit freely.
+    QUIZ: [
+      {
+        q: "Who is the naughtiest?",
+        answer: "Mo",
+        options: ["Mo", "Jon", "Josh", "Not me! 🙊"],
+      },
+      {
+        q: "What is Molly's favorite hobby?",
+        answer: "Pickin' and fartin'",
+        options: ["Pickin' and fartin'", "Gardening", "Cooking", "Cleaning"],
+      },
+      {
+        q: "Which gushis are the most commonly shared gushis?",
+        answer: "LooAyi gushi",
+        options: ["LooAyi gushi", "Huali gushi", "Josh gushi", "Baba gushi"],
+      },
+    ],
   };
 
   if (typeof module !== "undefined" && module.exports) {

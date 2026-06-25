@@ -13,7 +13,8 @@ before(async () => {
   browser = await launchBrowser();
   page = await browser.newPage();
   page.on("pageerror", (e) => pageErrors.push(String(e)));
-  await page.goto(baseURL, { waitUntil: "load" });
+  // The festival now lives at festival.html (index.html is the quiz gate).
+  await page.goto(baseURL + "festival.html", { waitUntil: "load" });
 });
 
 after(async () => {
@@ -186,7 +187,7 @@ test("reliability: features still work if the fireworks canvas is missing", asyn
     });
     const errs = [];
     p.on("pageerror", (e) => errs.push(String(e)));
-    await p.goto(baseURL, { waitUntil: "load" });
+    await p.goto(baseURL + "festival.html", { waitUntil: "load" });
     // Countdown/joke + memory still initialise despite no canvas.
     await p.waitForSelector("#joke:not([hidden])", { timeout: 9000 });
     assert.equal(await p.locator("#memory-grid .card-tile").count(), 12);
@@ -200,7 +201,7 @@ test("respects prefers-reduced-motion: no fireworks", async () => {
   const ctx = await browser.newContext({ reducedMotion: "reduce" });
   try {
     const rm = await ctx.newPage();
-    await rm.goto(baseURL, { waitUntil: "load" });
+    await rm.goto(baseURL + "festival.html", { waitUntil: "load" });
     await rm.waitForSelector("#joke:not([hidden])", { timeout: 9000 });
     await rm.waitForTimeout(400);
     const blank = await rm.evaluate(() => {
