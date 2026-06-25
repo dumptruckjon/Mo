@@ -59,6 +59,24 @@ Markdown link to the live site:
 This applies to every message — answers, status updates, questions, errors —
 without exception.
 
+### RULE 5 — Mobile-optimized for iOS Safari, always
+Mo views this on her iPhone, so the site MUST look and work great in **iOS
+Safari** on every change. This is non-negotiable:
+- **Responsive layout:** no horizontal overflow at phone widths; readable text;
+  content not hidden behind the notch or home indicator.
+- **iOS Safari specifics:** use `100dvh` (not bare `100vh`) for full-height;
+  `env(safe-area-inset-*)` for the notch (`viewport-fit=cover` is set);
+  `-webkit-` prefixes where Safari needs them (e.g. `backdrop-filter`);
+  `touch-action: manipulation` and `-webkit-tap-highlight-color: transparent`
+  on tappable elements so rapid taps don't zoom or flash.
+- **Tap targets ≥ 44px** (Apple HIG).
+- **Audio/animation:** any audio starts only on a user gesture (iOS blocks
+  autoplay); respect `prefers-reduced-motion`.
+- **Prove it:** `tests/mobile.test.js` emulates an iPhone (touch + viewport) and
+  must pass. A change is not complete until the mobile tests are green. For
+  pixel-level Safari quirks, also sanity-check on a real iPhone when feasible
+  (the emulation runs on Chromium, not true WebKit).
+
 ---
 
 ## Repository Structure
@@ -77,7 +95,9 @@ tooling.
 │                               #   garden, floating food, synthesized music. Reads window.MoContent.
 ├── tests/
 │   ├── site.test.js            # node:test unit/structure/logic tests (no browser)
-│   └── e2e.test.js             # Playwright browser tests — actually click every feature
+│   ├── e2e.test.js             # Playwright browser tests — actually click every feature
+│   ├── mobile.test.js          # Playwright iPhone-emulated tests — touch + responsive layout
+│   └── helpers.js              # shared: locate Chromium + serve the site locally
 ├── package.json                # `npm test` → `node --test` (runs unit + e2e)
 ├── package-lock.json           # committed for reproducible `npm ci` in CI
 ├── .gitignore                  # ignores node_modules etc.

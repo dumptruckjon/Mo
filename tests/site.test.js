@@ -88,6 +88,19 @@ test("festive background animation is defined", () => {
   assert.match(read("styles/main.css"), /@keyframes\s+festive/);
 });
 
+test("mobile / iOS Safari optimizations are in place", () => {
+  const html = read("index.html");
+  assert.match(html, /name="viewport"[^>]*viewport-fit=cover/, "viewport-fit=cover missing");
+  assert.match(html, /apple-mobile-web-app-capable/, "iOS web-app meta missing");
+
+  const css = read("styles/main.css");
+  assert.match(css, /100dvh/, "use dvh to avoid the iOS 100vh toolbar gap");
+  assert.match(css, /env\(safe-area-inset/, "respect the notch with safe-area insets");
+  assert.match(css, /-webkit-backdrop-filter/, "Safari needs -webkit-backdrop-filter");
+  assert.match(css, /touch-action:\s*manipulation/, "prevent double-tap zoom on tappables");
+  assert.match(css, /-webkit-tap-highlight-color/, "remove the iOS tap highlight");
+});
+
 // ---------- Pure logic ----------
 test("pickIndex never repeats and covers the whole range", () => {
   // Mirror of the picker in main.js.
