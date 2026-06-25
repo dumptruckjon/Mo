@@ -173,6 +173,29 @@ test("PWA: the site still loads offline (served from cache)", async () => {
   }
 });
 
+test("reliability: features still work if the fireworks canvas is missing", async () => {
+  const ctx = await browser.newContext();
+  try {
+    const p = await ctx.newPage();
+    // Remove #fireworks before the app's DOMContentLoaded handler runs.
+    await p.addInitScript(() => {
+      document.addEventListener("DOMContentLoaded", () => {
+        const c = document.getElementById("fireworks");
+        if (c) c.remove();
+      });
+    });
+    const errs = [];
+    p.on("pageerror", (e) => errs.push(String(e)));
+    await p.goto(baseURL, { waitUntil: "load" });
+    // Countdown/joke + memory still initialise despite no canvas.
+    await p.waitForSelector("#joke:not([hidden])", { timeout: 9000 });
+    assert.equal(await p.locator("#memory-grid .card-tile").count(), 12);
+    assert.deepEqual(errs, [], `unexpected page errors: ${errs.join("; ")}`);
+  } finally {
+    await ctx.close();
+  }
+});
+
 test("respects prefers-reduced-motion: no fireworks", async () => {
   const ctx = await browser.newContext({ reducedMotion: "reduce" });
   try {

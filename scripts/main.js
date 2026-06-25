@@ -275,7 +275,10 @@
 
   // ---------- Fireworks + candy (canvas particle system) ----------
   function createFireworks(canvas) {
-    const ctx = canvas.getContext("2d");
+    // No-op if the canvas is missing or 2D isn't supported, so a fireworks
+    // problem can never take down the rest of the page.
+    const ctx = canvas && canvas.getContext && canvas.getContext("2d");
+    if (!ctx) return { celebrate() {} };
     const particles = [];
     let rafRunning = false;
     let celebrating = 0;
@@ -326,6 +329,7 @@
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.font = "20px serif"; // set once per frame, not per emoji particle
 
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
@@ -341,7 +345,6 @@
         }
         ctx.globalAlpha = Math.max(p.life, 0);
         if (p.emoji) {
-          ctx.font = "20px serif";
           ctx.fillText(p.emoji, p.x, p.y);
         } else {
           ctx.fillStyle = p.color;
