@@ -1,6 +1,6 @@
 // Smoke + structure tests for Mo's site. No dependencies — runs with `node --test`.
-// These guard against regressions: missing files, broken references, removed
-// features (countdown / joke / fireworks), and JS syntax errors.
+// Guards against regressions: missing files/refs, removed features, malformed
+// content, and JS syntax errors.
 
 const test = require("node:test");
 const assert = require("node:assert");
@@ -10,72 +10,108 @@ const { execFileSync } = require("node:child_process");
 
 const root = path.join(__dirname, "..");
 const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
+const content = require("../scripts/content.js");
 
 test("core files exist", () => {
-  for (const f of ["index.html", "styles/main.css", "scripts/main.js"]) {
+  for (const f of ["index.html", "styles/main.css", "scripts/main.js", "scripts/content.js"]) {
     assert.ok(fs.existsSync(path.join(root, f)), `missing ${f}`);
   }
 });
 
-test("index.html references the stylesheet and script", () => {
+test("index.html references styles, content, and main script", () => {
   const html = read("index.html");
   assert.match(html, /styles\/main\.css/, "stylesheet not linked");
-  assert.match(html, /scripts\/main\.js/, "script not linked");
+  assert.match(html, /scripts\/content\.js/, "content.js not linked");
+  assert.match(html, /scripts\/main\.js/, "main.js not linked");
 });
 
-test("index.html contains the required UI hooks", () => {
+test("index.html has all required UI hooks", () => {
   const html = read("index.html");
-  for (const id of ['id="countdown"', 'id="joke"', 'id="restart"', 'id="fireworks"']) {
-    assert.ok(html.includes(id), `missing element ${id}`);
-  }
+  const ids = [
+    'id="countdown"', 'id="joke"', 'id="restart"', 'id="fireworks"',
+    'id="food-bg"', 'id="music-toggle"',
+    'id="fortune-cookie"', 'id="fortune-text"',
+    'id="garden"', 'id="flower-count"',
+    'id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"',
+  ];
+  for (const id of ids) assert.ok(html.includes(id), `missing element ${id}`);
 });
 
-test("the joke container has placeholders for JS to fill", () => {
-  const html = read("index.html");
-  for (const id of ['id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"']) {
-    assert.ok(html.includes(id), `missing joke placeholder ${id}`);
-  }
-});
-
-test("countdown starts at 5 and reveals a joke at zero", () => {
-  const js = read("scripts/main.js");
-  assert.match(js, /START\s*=\s*5\b/, "countdown should start at 5");
-  assert.match(js, /reachZero/, "missing reachZero handler");
+// ---------- Content module ----------
+test("countdown starts at 5", () => {
+  assert.equal(content.COUNTDOWN_START, 5);
 });
 
 test("there are at least 5 jokes, each fully formed", () => {
-  const js = read("scripts/main.js");
-  // Count joke objects by their required keys.
-  const zhCount = (js.match(/\bzh:/g) || []).length;
-  const punchCount = (js.match(/\bpunch:/g) || []).length;
-  const pinyinCount = (js.match(/\bpinyin:/g) || []).length;
-  const enCount = (js.match(/\ben:/g) || []).length;
-  assert.ok(zhCount >= 5, `expected >= 5 jokes, found ${zhCount}`);
-  // Every joke should have all four fields, so the counts must match.
-  assert.equal(punchCount, zhCount, "every joke needs a punch line");
-  assert.equal(pinyinCount, zhCount, "every joke needs pinyin");
-  assert.equal(enCount, zhCount, "every joke needs an English translation");
-});
-
-test("a random joke is selected each time", () => {
-  const js = read("scripts/main.js");
-  assert.match(js, /Math\.random\(\)/, "joke selection should be randomized");
-  assert.match(js, /pickJoke/, "missing pickJoke selector");
-});
-
-test("fireworks engine is wired up", () => {
-  const js = read("scripts/main.js");
-  for (const sym of ["createFireworks", "celebrate", "requestAnimationFrame"]) {
-    assert.ok(js.includes(sym), `fireworks: missing ${sym}`);
+  assert.ok(Array.isArray(content.JOKES) && content.JOKES.length >= 5,
+    `expected >= 5 jokes, got ${content.JOKES && content.JOKES.length}`);
+  for (const j of content.JOKES) {
+    for (const k of ["zh", "punch", "pinyin", "en"]) {
+      assert.ok(typeof j[k] === "string" && j[k].length > 0, `joke field "${k}" missing`);
+    }
   }
 });
 
-test("festive background animation is defined", () => {
-  const css = read("styles/main.css");
-  assert.match(css, /@keyframes\s+festive/, "festive background animation missing");
+test("there are at least 5 fortune-cookie notes", () => {
+  assert.ok(Array.isArray(content.FORTUNES) && content.FORTUNES.length >= 5,
+    `expected >= 5 fortunes, got ${content.FORTUNES && content.FORTUNES.length}`);
+  for (const f of content.FORTUNES) {
+    assert.ok(typeof f === "string" && f.length > 0, "empty fortune");
+  }
 });
 
-test("scripts/main.js is valid JavaScript (syntax check)", () => {
-  // Throws (non-zero exit) if the file has a syntax error.
+test("garden has flowers and the background has foods/candy", () => {
+  assert.ok(content.FLOWERS.length >= 3, "need a few flowers");
+  assert.ok(content.FOODS.length >= 6, "need several Chinese foods");
+  assert.ok(content.CANDY.length >= 3, "need some candy");
+});
+
+// ---------- Behavior wiring (main.js) ----------
+test("main.js wires up every feature", () => {
+  const js = read("scripts/main.js");
+  for (const sym of [
+    "initFoodBackground", "initCountdown", "initFortuneCookie",
+    "initGarden", "initMusic", "createFireworks",
+    "reachZero", "AudioContext", "mo-flower-count",
+  ]) {
+    assert.ok(js.includes(sym), `main.js missing ${sym}`);
+  }
+});
+
+test("selection is randomized", () => {
+  const js = read("scripts/main.js");
+  assert.match(js, /Math\.random\(\)/);
+  assert.match(js, /pickIndex/);
+});
+
+test("festive background animation is defined", () => {
+  assert.match(read("styles/main.css"), /@keyframes\s+festive/);
+});
+
+// ---------- Pure logic ----------
+test("pickIndex never repeats and covers the whole range", () => {
+  // Mirror of the picker in main.js.
+  function pickIndex(len, current) {
+    if (len <= 1) return 0;
+    let next = current;
+    while (next === current) next = Math.floor(Math.random() * len);
+    return next;
+  }
+  const len = content.JOKES.length;
+  const seen = new Set();
+  let cur = -1, repeats = 0;
+  for (let i = 0; i < 5000; i++) {
+    const n = pickIndex(len, cur);
+    if (n === cur) repeats++;
+    seen.add(n);
+    cur = n;
+  }
+  assert.equal(repeats, 0, "should never return the same index twice in a row");
+  assert.equal(seen.size, len, "should be able to reach every item");
+});
+
+// ---------- Syntax ----------
+test("scripts are valid JavaScript", () => {
+  execFileSync(process.execPath, ["--check", path.join(root, "scripts/content.js")]);
   execFileSync(process.execPath, ["--check", path.join(root, "scripts/main.js")]);
 });

@@ -59,32 +59,45 @@ tooling.
 
 ```
 .
-├── index.html                  # Site entry point (markup + content)
+├── index.html                  # Site entry point (markup + the festival sections)
 ├── styles/
-│   └── main.css                # All styling: animated festival background, countdown, joke reveal
+│   └── main.css                # All styling: festival bg, countdown, joke, cookie, garden, food, music
 ├── scripts/
-│   └── main.js                 # Vanilla JS: 10→0 countdown + canvas fireworks + Mandarin joke reveal
+│   ├── content.js              # ALL editable content (jokes, fortunes, flowers, foods, candy). Edit here.
+│   └── main.js                 # Vanilla JS behavior: countdown, fireworks+candy, fortune cookie,
+│                               #   garden, floating food, synthesized music. Reads window.MoContent.
 ├── tests/
-│   └── site.test.js            # node:test smoke/structure tests (no dependencies)
+│   └── site.test.js            # node:test smoke/structure/logic tests (no dependencies)
 ├── package.json                # `npm test` → `node --test`; no runtime deps
+├── .gitignore                  # ignores node_modules etc.
 ├── .github/workflows/
 │   └── deploy.yml              # CI: run tests, then deploy to GitHub Pages (deploy needs test)
 └── CLAUDE.md                   # This file
 ```
 
+> **To change any wording or add jokes/notes:** edit `scripts/content.js` only.
+> `content.js` works both in the browser (sets `window.MoContent`) and in Node
+> (`module.exports`), so the tests assert the real content.
+
 Update this tree whenever files are added or moved.
 
 ## Current Site Behavior
 
-- A festive, animated red/gold Chinese-New-Year-style background.
-- A countdown ticks from **5 → 0**.
-- At **0**, a **random** short joke in **Simplified Chinese** is revealed (with
-  pinyin and an English translation) and **canvas fireworks** launch. A
-  different joke is shown each time (never the same one twice in a row).
-- Clicking anywhere sets off extra fireworks; an "Again" button replays the
-  countdown with a fresh random joke.
-- The jokes live in the `JOKES` array in `scripts/main.js` (currently 6); add
-  your own there. JS fills the `#joke-*` placeholders in `index.html`.
+A little festival built around the things Mo loves (Chinese food, gardening,
+sweets):
+
+- A festive, animated red/gold background with **gently drifting Chinese food**
+  (dumplings, noodles, bubble tea, mooncakes…).
+- A **countdown from 5 → 0**, then a **random** short joke in Simplified Chinese
+  (pinyin + English) with **fireworks that also rain sweets/candy**. A different
+  joke shows each time (never the same one twice in a row). Click anywhere for
+  more fireworks; "Again" replays with a fresh joke.
+- A **fortune cookie** 🥠 — tap it to crack open a random sweet love-note.
+- A **grow-a-garden** 🌷 — tap the soil to plant flowers; a counter remembers how
+  many flowers have been grown for Mo (saved in `localStorage`).
+- A **soft music toggle** 🎵 in the corner — a gentle pentatonic melody
+  synthesized live via the Web Audio API (no audio file, never autoplays).
+- All wording lives in `scripts/content.js` for easy personalization.
 
 ## Development Workflow
 
@@ -97,7 +110,13 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
 Manually confirm the changed behavior (countdown reaches 0, joke shows,
-fireworks fire, layout works on a narrow/mobile width).
+fireworks fire, cookie cracks, garden plants, music toggles, layout works on a
+narrow/mobile width).
+
+For interactive changes, a headless-browser smoke check is worthwhile. Chromium
+is preinstalled; `playwright-core` can drive `http://localhost:<port>` and assert
+each feature works (note: continuously-animated elements like the bobbing cookie
+need `{ force: true }` clicks since Playwright sees them as never "stable").
 
 ### Testing
 ```bash

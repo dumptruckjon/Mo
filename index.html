@@ -3,20 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mo's Countdown 🏮</title>
-  <meta name="description" content="A festive countdown made with love for Mo." />
+  <title>Mo's Little Festival 🏮</title>
+  <meta name="description" content="A funny, sweet little festival made with love for Mo." />
   <link rel="stylesheet" href="styles/main.css" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏮</text></svg>" />
 </head>
 <body>
-  <!-- Fireworks render here, behind everything. -->
+  <!-- Fireworks + candy render here, behind everything. -->
   <canvas id="fireworks" aria-hidden="true"></canvas>
+  <!-- Gently drifting Chinese food. Populated by JS. -->
+  <div id="food-bg" aria-hidden="true"></div>
+
+  <!-- Soft music toggle (never autoplays). -->
+  <button id="music-toggle" type="button" aria-pressed="false" title="Toggle music">🔇</button>
 
   <main class="page">
     <header class="hero">
       <div class="lanterns" aria-hidden="true">🏮 🧧 🏮</div>
       <h1 class="hero__title">Hi&nbsp;Mo!</h1>
-      <p class="hero__subtitle">Get ready... 准备好了吗？</p>
+      <p class="hero__subtitle">A tiny festival, just for you. 准备好了吗？</p>
     </header>
 
     <section class="stage" aria-live="polite">
@@ -34,12 +39,28 @@
 
     <button class="btn" id="restart" type="button" hidden>再来一次 · Again 🎆</button>
 
+    <!-- Fortune cookie: tap to crack open a sweet note. -->
+    <section class="card fortune" aria-labelledby="fortune-h">
+      <h2 id="fortune-h">Crack open a fortune 🥠</h2>
+      <button class="cookie" id="fortune-cookie" type="button" aria-describedby="fortune-text">🥠</button>
+      <p class="fortune__text" id="fortune-text">Tap the cookie…</p>
+    </section>
+
+    <!-- Garden: tap the soil to grow flowers for Mo. -->
+    <section class="card garden" aria-labelledby="garden-h">
+      <h2 id="garden-h">Grow a garden for Mo 🌷</h2>
+      <p class="garden__hint">Tap the soil to plant a flower.</p>
+      <div class="soil" id="garden" role="button" tabindex="0"
+           aria-label="Garden soil — tap or press Enter to plant a flower"></div>
+      <p class="garden__count">🌸 <strong id="flower-count">0</strong> flowers grown for Mo</p>
+    </section>
+
     <footer class="footer">
       <p>恭喜发财 · Made with 💖 for Mo</p>
-      <!-- TODO (Jon): swap the joke in scripts/main.js for a personal one anytime. -->
     </footer>
   </main>
 
+  <script src="scripts/content.js" defer></script>
   <script src="scripts/main.js" defer></script>
 </body>
 </html>

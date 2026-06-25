@@ -1,4 +1,4 @@
-/* Mo's festive countdown — plain CSS, no build step, no dependencies. */
+/* Mo's little festival — plain CSS, no build step, no dependencies. */
 
 :root {
   --red: #d4001a;
@@ -6,6 +6,9 @@
   --gold: #ffd24d;
   --gold-deep: #f5a623;
   --ink: #fff7e6;
+  --pink: #ff8fb1;
+  --soil: #5a3a22;
+  --soil-dark: #3f2817;
   --shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
 }
 
@@ -51,6 +54,44 @@ body {
   z-index: 0;
   pointer-events: none;
 }
+
+/* Drifting Chinese food layer. */
+#food-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.food {
+  position: absolute;
+  bottom: -12%;
+  font-size: 2rem;
+  opacity: 0.5;
+  will-change: transform;
+  animation: drift linear infinite;
+}
+
+/* Music toggle, pinned to a corner. */
+#music-toggle {
+  position: fixed;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  background: rgba(160, 0, 20, 0.6);
+  color: var(--gold);
+  font-size: 1.3rem;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+  transition: transform 0.1s ease;
+}
+#music-toggle:hover { transform: scale(1.08); }
+#music-toggle[aria-pressed="true"] { background: rgba(245, 166, 35, 0.8); }
 
 .page {
   position: relative;
@@ -101,11 +142,6 @@ body {
   animation: pop 1s ease;
 }
 
-/* re-trigger the pop animation on each tick via class toggle */
-.countdown.tick {
-  animation: none;
-}
-
 /* ---------- Joke reveal ---------- */
 .joke {
   background: rgba(160, 0, 20, 0.55);
@@ -117,31 +153,82 @@ body {
   backdrop-filter: blur(2px);
 }
 
-.joke__zh {
-  font-size: 1.8rem;
-  margin: 0 0 0.25rem;
-  color: var(--gold);
-}
-
+.joke__zh { font-size: 1.8rem; margin: 0 0 0.25rem; color: var(--gold); }
 .joke__punch {
-  font-size: 2.2rem;
-  font-weight: 900;
-  margin: 0 0 0.75rem;
-  color: #fff;
+  font-size: 2.2rem; font-weight: 900; margin: 0 0 0.75rem; color: #fff;
   text-shadow: 0 0 18px rgba(255, 210, 77, 0.9);
 }
+.joke__pinyin { font-size: 1rem; font-style: italic; opacity: 0.85; margin: 0.25rem 0; }
+.joke__en { font-size: 1.05rem; margin: 0.5rem 0 0; }
 
-.joke__pinyin {
-  font-size: 1rem;
-  font-style: italic;
-  opacity: 0.85;
-  margin: 0.25rem 0;
+/* ---------- Cards (fortune + garden) ---------- */
+.card {
+  width: 100%;
+  background: rgba(160, 0, 20, 0.45);
+  border: 2px solid var(--gold);
+  border-radius: 22px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(2px);
 }
 
-.joke__en {
-  font-size: 1.05rem;
-  margin: 0.5rem 0 0;
+.card h2 { margin: 0 0 0.75rem; color: var(--gold); font-size: 1.4rem; }
+
+/* ---------- Fortune cookie ---------- */
+.cookie {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 4.5rem;
+  line-height: 1;
+  padding: 0.25rem 0.75rem;
+  transition: transform 0.12s ease;
+  animation: bob 2.8s ease-in-out infinite;
 }
+.cookie:hover { transform: scale(1.1) rotate(-4deg); }
+.cookie.crack { animation: crack 0.5s ease; }
+
+.fortune__text {
+  margin: 0.75rem auto 0;
+  max-width: 28rem;
+  font-size: 1.15rem;
+  min-height: 2.5rem;
+  color: var(--ink);
+}
+
+/* ---------- Garden ---------- */
+.garden__hint { margin: 0 0 0.75rem; opacity: 0.85; }
+
+.soil {
+  position: relative;
+  height: 120px;
+  border-radius: 14px;
+  cursor: pointer;
+  overflow: hidden;
+  background: linear-gradient(var(--soil), var(--soil-dark));
+  box-shadow: inset 0 6px 14px rgba(0, 0, 0, 0.4);
+  outline-offset: 3px;
+}
+.soil::after {
+  /* a little grassy top edge */
+  content: "";
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 8px;
+  background: repeating-linear-gradient(90deg, #3e7d34 0 6px, #356b2c 6px 12px);
+}
+
+.flower {
+  position: absolute;
+  bottom: 4px;
+  transform: translateX(-50%);
+  font-size: 1.8rem;
+  transform-origin: bottom center;
+  animation: sprout 0.6s ease both;
+}
+
+.garden__count { margin: 0.85rem 0 0; font-size: 1.1rem; }
+.garden__count strong { color: var(--gold); font-size: 1.35rem; }
 
 /* ---------- Button ---------- */
 .btn {
@@ -156,16 +243,11 @@ body {
   box-shadow: var(--shadow);
   transition: transform 0.1s ease;
 }
-
 .btn:hover { transform: translateY(-2px); }
 .btn:active { transform: translateY(1px) scale(0.98); }
 
 /* ---------- Footer ---------- */
-.footer {
-  color: var(--gold);
-  font-size: 0.95rem;
-  opacity: 0.9;
-}
+.footer { color: var(--gold); font-size: 0.95rem; opacity: 0.9; }
 
 /* ---------- Animations ---------- */
 @keyframes festive {
@@ -173,19 +255,37 @@ body {
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
-
 @keyframes sway {
   0%, 100% { transform: rotate(-4deg); }
   50% { transform: rotate(4deg); }
 }
-
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
 @keyframes pop {
   0% { transform: scale(0.3); opacity: 0; }
   60% { transform: scale(1.15); opacity: 1; }
   100% { transform: scale(1); opacity: 1; }
 }
+@keyframes crack {
+  0% { transform: scale(1) rotate(0); }
+  30% { transform: scale(1.25) rotate(-8deg); }
+  60% { transform: scale(0.9) rotate(6deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes sprout {
+  0% { transform: translateX(-50%) scale(0) translateY(10px); }
+  70% { transform: translateX(-50%) scale(1.2) translateY(0); }
+  100% { transform: translateX(-50%) scale(1) translateY(0); }
+}
+@keyframes drift {
+  0% { transform: translateY(0) rotate(0); }
+  100% { transform: translateY(-120vh) rotate(40deg); }
+}
 
 @media (prefers-reduced-motion: reduce) {
-  body { animation: none; }
-  .lanterns, .countdown, .joke { animation: none; }
+  body, .lanterns, .countdown, .joke, .cookie, .flower, .food {
+    animation: none !important;
+  }
 }
