@@ -25,6 +25,18 @@ test("index.html references styles, content, and main script", () => {
   assert.match(html, /scripts\/main\.js/, "main.js not linked");
 });
 
+test("assets are cache-busted (version query) so browsers fetch fresh files", () => {
+  const html = read("index.html");
+  assert.match(html, /styles\/main\.css\?v=/, "css not cache-busted");
+  assert.match(html, /scripts\/content\.js\?v=/, "content.js not cache-busted");
+  assert.match(html, /scripts\/main\.js\?v=/, "main.js not cache-busted");
+});
+
+test("feature inits are isolated so one failure can't break the others", () => {
+  const js = read("scripts/main.js");
+  assert.match(js, /try\s*\{\s*init\(\)/, "inits should run inside try/catch");
+});
+
 test("index.html has all required UI hooks", () => {
   const html = read("index.html");
   const ids = [

@@ -72,10 +72,31 @@ Safari** on every change. This is non-negotiable:
 - **Tap targets ≥ 44px** (Apple HIG).
 - **Audio/animation:** any audio starts only on a user gesture (iOS blocks
   autoplay); respect `prefers-reduced-motion`.
-- **Prove it:** `tests/mobile.test.js` emulates an iPhone (touch + viewport) and
-  must pass. A change is not complete until the mobile tests are green. For
-  pixel-level Safari quirks, also sanity-check on a real iPhone when feasible
-  (the emulation runs on Chromium, not true WebKit).
+- **Prove it:** `tests/mobile.test.js` runs on **real WebKit (Safari's engine)**
+  when available (CI installs it), falling back to Chromium iPhone-emulation
+  locally. It must pass. A change is not complete until the mobile tests are
+  green.
+
+### RULE 6 — Never ship broken or unvalidated; verify the LIVE site
+Tests passing on local files is NOT proof the deployed site works. A change is
+"done" only after the **actual live URL** has been verified in a real browser.
+This rule exists because shipping new features without cache-busting once served
+users stale JS — the features were dead on real devices while every local test
+passed.
+- **Cache-bust every asset.** Asset URLs in `index.html` carry `?v=dev`, which
+  the deploy job rewrites to the commit SHA (`?v=<sha>`). Never reference a JS/CSS
+  asset without the version query — stale caches are a shipping bug.
+- **Verify the deployed site, not just local files.** CI's `verify-live` job
+  waits for the live URL to serve the new commit, then runs the full browser
+  suite (Chromium **and** WebKit) against the **live** URL via `MO_BASE_URL`. A
+  red `verify-live` means the deploy is broken even if `test` was green — treat
+  it as a stop-the-line failure.
+- **Don't claim "verified on iOS / it works" from emulation or code reading
+  alone.** Note honestly what was and wasn't exercised. (The agent sandbox can't
+  reach `github.io`; rely on the `verify-live` CI job for live proof, and ask the
+  user to confirm on a real iPhone for pixel-level Safari quirks.)
+- **Isolate features.** Each feature init is wrapped in try/catch so one failure
+  can't silently kill the rest of the page.
 
 ---
 
@@ -102,7 +123,7 @@ tooling.
 ├── package-lock.json           # committed for reproducible `npm ci` in CI
 ├── .gitignore                  # ignores node_modules etc.
 ├── .github/workflows/
-│   └── deploy.yml              # CI: run tests, then deploy to GitHub Pages (deploy needs test)
+│   └── deploy.yml              # CI: test (unit+e2e+WebKit) → deploy (cache-busts assets) → verify-live
 └── CLAUDE.md                   # This file
 ```
 
@@ -148,38 +169,48 @@ python3 -m http.server 8000   # then open http://localhost:8000
 ```
 
 Manually confirm the changed behavior (countdown reaches 0, joke shows,
-fireworks fire, cookie cracks, garden plants, music toggles, layout works on a
-narrow/mobile width).
+fireworks fire, cookie cracks, garden plants, envelopes open, memory game plays,
+layout works on a narrow/mobile width).
 
 For interactive changes this manual pass is in addition to — never instead of —
-the automated browser tests in `tests/e2e.test.js` (see Testing and RULE 2).
+the automated browser tests (see Testing, RULE 2, RULE 6).
 
 ### Testing
 ```bash
 npm install     # first time: installs Playwright (dev dependency)
-npm test        # runs node --test over tests/*.test.js (unit + browser e2e)
+npm test        # node --test over tests/*.test.js (unit + e2e + mobile)
 ```
-`tests/site.test.js` is fast and browser-free. `tests/e2e.test.js` launches
-**Chromium via Playwright** and clicks every interactive element (countdown→joke,
-fortune cookie, garden planting, music toggle) — proving behavior, not just
-structure. All of it must pass before every push (RULE 2 & 3).
+- `tests/site.test.js` — fast, browser-free structure/content/logic checks.
+- `tests/e2e.test.js` — Chromium; clicks every interactive feature (countdown→
+  joke, cookie, garden, **red envelopes**, **memory match** incl. a full solve).
+- `tests/mobile.test.js` — **real WebKit (Safari engine)** when installed, else
+  Chromium iPhone-emulation; validates touch + responsive layout.
 
-**Chromium binary:** the e2e test auto-locates one — it uses the browser
-Playwright expects if present, otherwise scans `$PLAYWRIGHT_BROWSERS_PATH`
-(`/opt/pw-browsers`) for a preinstalled Chromium. In this dev environment
-Chromium is preinstalled, so do NOT run `playwright install` here. In CI
-(`deploy.yml`) the `test` job runs `npx playwright install --with-deps chromium`
-before `npm test`. Note: continuously-animated elements (e.g. the bobbing
-cookie) need `{ force: true }` clicks since Playwright treats them as never
-"stable".
+All must pass before every push (RULE 2 & 3).
+
+**Browser binaries:** tests auto-locate one — Playwright's expected browser if
+present, else a scan of `$PLAYWRIGHT_BROWSERS_PATH` (`/opt/pw-browsers`). In this
+dev environment Chromium is preinstalled (WebKit is not), so do NOT run
+`playwright install` here — mobile tests fall back to Chromium locally. CI runs
+`npx playwright install --with-deps chromium webkit`, so real Safari-engine
+coverage happens there. Note: continuously-animated elements (e.g. the bobbing
+cookie) need `{ force: true }` clicks.
+
+**Testing the live site:** set `MO_BASE_URL=<url>` and the browser tests run
+against that URL instead of a local server (used by CI's `verify-live` job).
 
 ### Deploying (automated)
 `.github/workflows/deploy.yml` runs on every push to `main`:
-1. **test** job — `npm test` must pass.
-2. **deploy** job — `needs: test`; uploads the repo root and publishes to Pages.
+1. **test** job — `npm test` (unit + e2e + mobile WebKit) must pass.
+2. **deploy** job — `needs: test`; rewrites `?v=dev` → `?v=<sha>` to cache-bust
+   assets, then uploads the repo root and publishes to Pages.
+3. **verify-live** job — `needs: deploy`; waits for the live URL to serve this
+   commit, then runs the browser suite against the **live** site (Chromium +
+   WebKit). This is the real proof the deploy works.
 
-So a failing test blocks the deploy by design. After pushing, confirm the run is
-green and the live site updated.
+A failing **test** blocks the deploy; a failing **verify-live** means the live
+site is broken — fix forward immediately. After pushing, confirm all three jobs
+are green.
 
 > One-time GitHub setup (already done, documented for reference):
 > repo is **public**; **Settings → Pages → Source = GitHub Actions**; default

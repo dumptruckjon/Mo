@@ -259,6 +259,7 @@ body {
 }
 .card-tile {
   aspect-ratio: 1 / 1;
+  min-height: 64px; /* fallback so tiles are visible even without aspect-ratio */
   border: 2px solid var(--gold);
   border-radius: 12px;
   background: linear-gradient(145deg, #b3001f, #7c0016);

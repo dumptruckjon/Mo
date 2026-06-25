@@ -14,13 +14,19 @@
   const randItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
   document.addEventListener("DOMContentLoaded", () => {
-    initFoodBackground();
     const fireworks = createFireworks(document.getElementById("fireworks"));
-    initCountdown(fireworks);
-    initFortuneCookie();
-    initGarden();
-    initEnvelopes();
-    initMemory(fireworks);
+    // Isolate each feature: if one throws, the others still work.
+    const features = [
+      initFoodBackground,
+      () => initCountdown(fireworks),
+      initFortuneCookie,
+      initGarden,
+      initEnvelopes,
+      () => initMemory(fireworks),
+    ];
+    for (const init of features) {
+      try { init(); } catch (e) { console.error("Mo: a feature failed to start:", e); }
+    }
   });
 
   // ---------- Floating Chinese food ----------

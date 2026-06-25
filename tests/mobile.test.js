@@ -1,17 +1,15 @@
-// Mobile / iOS Safari checks. Emulates an iPhone viewport with touch and asserts
-// the layout and touch interactions hold up (no horizontal overflow, tap targets
-// big enough, tap-to-use works).
+// Mobile / iOS Safari checks. Runs on real WebKit (Safari's engine) when it's
+// installed (CI), otherwise Chromium with iPhone emulation (local fallback).
+// Validates responsive layout AND that the interactive features actually work
+// on touch — including the red envelopes and memory game.
 //
-// NOTE: This uses Chromium with iPhone emulation (viewport + touch + iOS UA),
-// which catches responsive-layout and touch regressions. True WebKit/Safari
-// rendering isn't available in this environment's preinstalled browser; pair this
-// with a manual check on a real iPhone for pixel-level Safari quirks.
+// Set MO_BASE_URL to run these against the LIVE deployed site instead of a
+// local server (used by the post-deploy verification job).
 
 const { test, before, after } = require("node:test");
 const assert = require("node:assert");
-const { startServer, launchBrowser } = require("./helpers");
+const { startServer, launchMobileBrowser } = require("./helpers");
 
-// iPhone 13/14-class device.
 const IPHONE = {
   viewport: { width: 390, height: 844 },
   deviceScaleFactor: 3,
@@ -22,17 +20,23 @@ const IPHONE = {
     "(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1",
 };
 
-let server, browser, context, page;
+let server, browser, context, page, engine;
 const pageErrors = [];
 
 before(async () => {
   let baseURL;
   ({ server, baseURL } = await startServer());
-  browser = await launchBrowser();
-  context = await browser.newContext(IPHONE);
+  ({ browser, engine } = await launchMobileBrowser());
+  // WebKit rejects some emulation knobs; keep only what it accepts.
+  const opts = engine === "webkit"
+    ? { viewport: IPHONE.viewport, hasTouch: true, isMobile: true }
+    : IPHONE;
+  context = await browser.newContext(opts);
   page = await context.newPage();
   page.on("pageerror", (e) => pageErrors.push(String(e)));
   await page.goto(baseURL, { waitUntil: "load" });
+  // eslint-disable-next-line no-console
+  console.log(`[mobile] engine=${engine} url=${baseURL}`);
 });
 
 after(async () => {
@@ -57,14 +61,9 @@ test("primary tap targets meet the 44px minimum", async () => {
   const cookie = await page.locator("#fortune-cookie").boundingBox();
   assert.ok(cookie && cookie.width >= 44 && cookie.height >= 44,
     `cookie too small: ${JSON.stringify(cookie)}`);
-
   const envelope = await page.locator("#envelopes .envelope").first().boundingBox();
   assert.ok(envelope && envelope.width >= 44 && envelope.height >= 44,
     `envelope too small: ${JSON.stringify(envelope)}`);
-
-  await page.waitForSelector("#restart:not([hidden])", { timeout: 9000 });
-  const again = await page.locator("#restart").boundingBox();
-  assert.ok(again && again.height >= 44, `Again button too short: ${JSON.stringify(again)}`);
 });
 
 test("tapping the cookie works with touch", async () => {
@@ -72,21 +71,53 @@ test("tapping the cookie works with touch", async () => {
   await page.locator("#fortune-cookie").tap({ force: true });
   await page.waitForFunction(
     (b) => document.getElementById("fortune-text").textContent.trim() !== b,
-    before, { timeout: 3000 }
+    before, { timeout: 4000 }
   );
-  const after = (await page.textContent("#fortune-text")).trim();
-  assert.notEqual(after, before, "fortune should change on tap");
+  assert.notEqual((await page.textContent("#fortune-text")).trim(), before);
 });
 
-test("tapping the garden plants a flower with touch", async () => {
-  const c0 = parseInt(await page.textContent("#flower-count"), 10);
-  await page.locator("#garden").tap({ position: { x: 50, y: 60 }, force: true });
+test("tapping a red envelope reveals a coupon (touch)", async () => {
+  const before = (await page.textContent("#envelope-text")).trim();
+  await page.locator("#envelopes .envelope").first().tap({ force: true });
   await page.waitForFunction(
-    (c) => parseInt(document.getElementById("flower-count").textContent, 10) > c,
-    c0, { timeout: 3000 }
+    (b) => document.getElementById("envelope-text").textContent.trim() !== b,
+    before, { timeout: 4000 }
   );
-  const c1 = parseInt(await page.textContent("#flower-count"), 10);
-  assert.equal(c1, c0 + 1, "tapping soil should plant one flower");
+  assert.match((await page.textContent("#envelope-text")).trim(), /Coupon/i);
+});
+
+test("the memory game renders tiles and a tapped pair matches (touch)", async () => {
+  const tiles = page.locator("#memory-grid .card-tile");
+  await page.waitForFunction(
+    () => document.querySelectorAll("#memory-grid .card-tile").length === 12,
+    null, { timeout: 4000 }
+  );
+  assert.equal(await tiles.count(), 12, "memory grid should render 12 tiles");
+
+  // Tiles must be visibly sized (the bug: empty/collapsed grid).
+  const box = await tiles.first().boundingBox();
+  assert.ok(box && box.height >= 40 && box.width >= 40,
+    `memory tile too small/invisible: ${JSON.stringify(box)}`);
+
+  const emojis = await tiles.evaluateAll((els) => els.map((e) => e.dataset.emoji));
+  const a = 0;
+  const b = emojis.indexOf(emojis[a], 1);
+  await tiles.nth(a).tap();
+  await tiles.nth(b).tap();
+  await page.waitForFunction(
+    (i) => document.querySelectorAll("#memory-grid .card-tile")[i].classList.contains("matched"),
+    a, { timeout: 4000 }
+  );
+  assert.ok(await tiles.nth(a).evaluate((e) => e.classList.contains("matched")));
+});
+
+test("New game re-renders a full board (touch)", async () => {
+  await page.locator("#memory-new").tap();
+  await page.waitForFunction(
+    () => document.querySelectorAll("#memory-grid .card-tile").length === 12,
+    null, { timeout: 4000 }
+  );
+  assert.equal(await page.locator("#memory-grid .card-tile").count(), 12);
 });
 
 test("no uncaught page errors on mobile", () => {

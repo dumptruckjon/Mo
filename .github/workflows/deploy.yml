@@ -33,10 +33,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Chromium for browser tests
-        run: npx playwright install --with-deps chromium
+      - name: Install browsers (Chromium + WebKit/Safari engine)
+        run: npx playwright install --with-deps chromium webkit
 
-      - name: Run tests (unit + browser e2e)
+      - name: Run tests (unit + browser e2e + mobile WebKit)
         run: npm test
 
   deploy:
@@ -45,9 +45,15 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Cache-bust assets with the commit SHA
+        # Rewrites ?v=dev -> ?v=<sha> so browsers never serve stale JS/CSS.
+        run: sed -i "s/?v=dev/?v=${GITHUB_SHA::8}/g" index.html
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -55,9 +61,47 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # The whole repo root is the site (plain static files).
           path: "."
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Validate the ACTUAL deployed site in real browsers — including WebKit
+  # (Safari's engine) — so we never again declare something shipped that's broken.
+  verify-live:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install browsers (Chromium + WebKit/Safari engine)
+        run: npx playwright install --with-deps chromium webkit
+
+      - name: Wait for the live site to serve this commit
+        run: |
+          url="${{ needs.deploy.outputs.page_url }}"
+          if [ -z "$url" ]; then url="https://dumptruckjon.github.io/Mo/"; fi
+          echo "MO_BASE_URL=$url" >> "$GITHUB_ENV"
+          sha="${GITHUB_SHA::8}"
+          echo "Polling $url for ?v=$sha ..."
+          for i in $(seq 1 30); do
+            if curl -fsSL "$url" | grep -q "v=$sha"; then
+              echo "Live site is serving $sha"; exit 0
+            fi
+            echo "attempt $i: not yet, waiting 10s"; sleep 10
+          done
+          echo "::error::Live site did not update to $sha within ~5 min"; exit 1
+
+      - name: Run browser tests against the LIVE site
+        run: npm test
