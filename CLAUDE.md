@@ -25,21 +25,30 @@ side branch, or local-only. One change → one commit → pushed to `main`.
 
 ### RULE 2 — Validate and verify everything; never ship a regression
 Before every push you MUST prove the change works and breaks nothing:
-1. **Run the full test suite** (`npm test`) and confirm it passes.
-2. **Verify the actual functionality** that changed (open/serve the page and
-   confirm the behavior — see "Verifying locally" below).
+1. **Run the full test suite** (`npm test`) — this runs BOTH the unit tests and
+   the **Playwright browser tests**, and it must pass.
+2. **Actually exercise the behavior in a real browser.** Clicks and functions
+   must be proven to work — not assumed from reading code. The `tests/e2e.test.js`
+   suite loads the page in Chromium and clicks every interactive element; an edit
+   to any interactive behavior is NOT complete until a browser test drives it and
+   passes. Never declare an edit "done" or "functional" on the basis of structure
+   tests or code inspection alone.
 3. **Watch the deploy** after pushing: confirm the GitHub Actions run goes green
    and the live site reflects the change. A push is not "done" until the deploy
    succeeds.
 If anything fails — tests, the page, or the deploy — fix it before moving on.
 Treat any break or regression as a stop-the-line event.
 
-### RULE 3 — Always add test cases
-Every change MUST include or update tests in `tests/`. New feature → new tests
-covering it. Bug fix → a test that would have caught the bug. Changed behavior →
-updated assertions. Tests live in `tests/*.test.js` and run with `node --test`
-(zero dependencies). Never add functionality without a corresponding test, and
-never let the suite shrink in coverage without explicit user approval.
+### RULE 3 — Always add test cases (unit AND browser)
+Every change MUST include or update tests in `tests/`:
+- **Content/logic** → assertions in `tests/site.test.js`.
+- **Any interactive behavior (a click, input, toggle, animation trigger)** → a
+  Playwright test in `tests/e2e.test.js` that performs the action and verifies
+  the result in the DOM.
+New feature → new tests covering it (including a browser test if it's
+interactive). Bug fix → a test that would have caught the bug. Never add
+functionality without a corresponding test, and never let coverage shrink
+without explicit user approval.
 
 ### RULE 4 — Every reply includes a clickable link to the live site
 **Every single response** Claude sends in this project MUST end with a clickable
@@ -67,8 +76,10 @@ tooling.
 │   └── main.js                 # Vanilla JS behavior: countdown, fireworks+candy, fortune cookie,
 │                               #   garden, floating food, synthesized music. Reads window.MoContent.
 ├── tests/
-│   └── site.test.js            # node:test smoke/structure/logic tests (no dependencies)
-├── package.json                # `npm test` → `node --test`; no runtime deps
+│   ├── site.test.js            # node:test unit/structure/logic tests (no browser)
+│   └── e2e.test.js             # Playwright browser tests — actually click every feature
+├── package.json                # `npm test` → `node --test` (runs unit + e2e)
+├── package-lock.json           # committed for reproducible `npm ci` in CI
 ├── .gitignore                  # ignores node_modules etc.
 ├── .github/workflows/
 │   └── deploy.yml              # CI: run tests, then deploy to GitHub Pages (deploy needs test)
@@ -113,16 +124,27 @@ Manually confirm the changed behavior (countdown reaches 0, joke shows,
 fireworks fire, cookie cracks, garden plants, music toggles, layout works on a
 narrow/mobile width).
 
-For interactive changes, a headless-browser smoke check is worthwhile. Chromium
-is preinstalled; `playwright-core` can drive `http://localhost:<port>` and assert
-each feature works (note: continuously-animated elements like the bobbing cookie
-need `{ force: true }` clicks since Playwright sees them as never "stable").
+For interactive changes this manual pass is in addition to — never instead of —
+the automated browser tests in `tests/e2e.test.js` (see Testing and RULE 2).
 
 ### Testing
 ```bash
-npm test        # runs node --test over tests/*.test.js
+npm install     # first time: installs Playwright (dev dependency)
+npm test        # runs node --test over tests/*.test.js (unit + browser e2e)
 ```
-Tests are dependency-free and must pass before every push (RULE 2 & 3).
+`tests/site.test.js` is fast and browser-free. `tests/e2e.test.js` launches
+**Chromium via Playwright** and clicks every interactive element (countdown→joke,
+fortune cookie, garden planting, music toggle) — proving behavior, not just
+structure. All of it must pass before every push (RULE 2 & 3).
+
+**Chromium binary:** the e2e test auto-locates one — it uses the browser
+Playwright expects if present, otherwise scans `$PLAYWRIGHT_BROWSERS_PATH`
+(`/opt/pw-browsers`) for a preinstalled Chromium. In this dev environment
+Chromium is preinstalled, so do NOT run `playwright install` here. In CI
+(`deploy.yml`) the `test` job runs `npx playwright install --with-deps chromium`
+before `npm test`. Note: continuously-animated elements (e.g. the bobbing
+cookie) need `{ force: true }` clicks since Playwright treats them as never
+"stable".
 
 ### Deploying (automated)
 `.github/workflows/deploy.yml` runs on every push to `main`:

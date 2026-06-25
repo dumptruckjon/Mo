@@ -28,8 +28,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
 
-      - name: Run tests
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium for browser tests
+        run: npx playwright install --with-deps chromium
+
+      - name: Run tests (unit + browser e2e)
         run: npm test
 
   deploy:

@@ -5,5 +5,8 @@
   "description": "A funny GitHub Pages site for Mo.",
   "scripts": {
     "test": "node --test"
+  },
+  "devDependencies": {
+    "playwright": "^1.61.1"
   }
 }
