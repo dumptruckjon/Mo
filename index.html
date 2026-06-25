@@ -3,47 +3,40 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>A Website for Mo 💖</title>
-  <meta name="description" content="A small, silly website made with love for Mo." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <title>Mo's Countdown 🏮</title>
+  <meta name="description" content="A festive countdown made with love for Mo." />
   <link rel="stylesheet" href="styles/main.css" />
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💖</text></svg>" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏮</text></svg>" />
 </head>
 <body>
+  <!-- Fireworks render here, behind everything. -->
+  <canvas id="fireworks" aria-hidden="true"></canvas>
+
   <main class="page">
     <header class="hero">
-      <div class="hero__emoji" aria-hidden="true">💖</div>
+      <div class="lanterns" aria-hidden="true">🏮 🧧 🏮</div>
       <h1 class="hero__title">Hi&nbsp;Mo!</h1>
-      <p class="hero__subtitle">
-        This entire corner of the internet exists for exactly one person.
-        <br />
-        (Spoiler: it's you.)
-      </p>
+      <p class="hero__subtitle">Get ready... 准备好了吗？</p>
     </header>
 
-    <section class="card" aria-labelledby="compliment-heading">
-      <h2 id="compliment-heading">Your Daily Dose of Flattery</h2>
-      <p class="compliment" id="compliment">Press the button. Trust the process.</p>
-      <button class="btn" id="compliment-btn" type="button">
-        Compliment me 👉
-      </button>
+    <section class="stage" aria-live="polite">
+      <!-- The big countdown number. -->
+      <div class="countdown" id="countdown">10</div>
+
+      <!-- Revealed when the countdown hits zero. -->
+      <div class="joke" id="joke" hidden>
+        <p class="joke__zh" lang="zh-Hans">什么东西越洗越脏？</p>
+        <p class="joke__punch" lang="zh-Hans">——水！💦</p>
+        <p class="joke__pinyin">Shénme dōngxi yuè xǐ yuè zāng? Shuǐ!</p>
+        <p class="joke__en">"What gets dirtier the more you wash it? Water!" 😆</p>
+      </div>
     </section>
 
-    <section class="card" aria-labelledby="counter-heading">
-      <h2 id="counter-heading">Official Mo Appreciation Counter</h2>
-      <p class="counter">
-        You have been appreciated
-        <strong id="counter" aria-live="polite">0</strong>
-        times since opening this page.
-      </p>
-      <button class="btn btn--secondary" id="counter-btn" type="button">
-        Appreciate Mo +1
-      </button>
-    </section>
+    <button class="btn" id="restart" type="button" hidden>再来一次 · Again 🎆</button>
 
     <footer class="footer">
-      <p>Made with 💖, questionable jokes, and zero dependencies.</p>
-      <!-- TODO (Jon): personalize this — inside jokes, a real photo, your anniversary date, etc. -->
+      <p>恭喜发财 · Made with 💖 for Mo</p>
+      <!-- TODO (Jon): swap the joke in scripts/main.js for a personal one anytime. -->
     </footer>
   </main>
 

@@ -27,9 +27,9 @@ A plain static site — no framework, no build step. Current layout:
 .
 ├── index.html                  # Site entry point (markup + content)
 ├── styles/
-│   └── main.css                # All styling (CSS custom properties, no preprocessor)
+│   └── main.css                # All styling: animated festival background, countdown, joke reveal
 ├── scripts/
-│   └── main.js                 # Vanilla JS: compliment generator + appreciation counter
+│   └── main.js                 # Vanilla JS: 10→0 countdown + canvas fireworks + Mandarin joke reveal
 ├── assets/                     # TODO — images, fonts, audio, etc. (none yet)
 ├── .github/workflows/
 │   └── deploy.yml              # GitHub Actions → GitHub Pages deploy

@@ -1,137 +1,191 @@
-/* Mo's website — plain CSS, no build step, no dependencies. */
+/* Mo's festive countdown — plain CSS, no build step, no dependencies. */
 
 :root {
-  --bg: #fff0f6;
-  --bg-accent: #ffe0ec;
-  --card: #ffffff;
-  --ink: #3a2a35;
-  --pink: #ff5c8a;
-  --pink-dark: #e0436f;
-  --purple: #9b6dff;
-  --shadow: 0 10px 30px rgba(224, 67, 111, 0.18);
-  --radius: 20px;
+  --red: #d4001a;
+  --crimson: #a00014;
+  --gold: #ffd24d;
+  --gold-deep: #f5a623;
+  --ink: #fff7e6;
+  --shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
 }
 
 * {
   box-sizing: border-box;
 }
 
-body {
+html, body {
   margin: 0;
+  min-height: 100%;
+}
+
+body {
   min-height: 100vh;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui,
+    -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   color: var(--ink);
-  background: radial-gradient(circle at top, var(--bg-accent), var(--bg));
+  overflow-x: hidden;
   display: flex;
   justify-content: center;
   padding: 2rem 1rem 4rem;
+
+  /* Colorful, animated Chinese-festival background. */
+  background: linear-gradient(
+    135deg,
+    #d4001a,
+    #ff5e3a,
+    #ff2d55,
+    #c2003d,
+    #ff9500,
+    #d4001a
+  );
+  background-size: 400% 400%;
+  animation: festive 14s ease infinite;
+}
+
+/* Fireworks canvas sits behind the content. */
+#fireworks {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .page {
+  position: relative;
+  z-index: 1;
   width: 100%;
   max-width: 640px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 1.5rem;
+  text-align: center;
 }
 
 /* ---------- Hero ---------- */
-.hero {
-  text-align: center;
-  padding: 1rem 0 0.5rem;
-}
-
-.hero__emoji {
-  font-size: 4rem;
-  animation: bob 2.5s ease-in-out infinite;
+.lanterns {
+  font-size: 2.5rem;
+  animation: sway 3s ease-in-out infinite;
 }
 
 .hero__title {
-  font-size: clamp(2.5rem, 10vw, 4rem);
+  font-size: clamp(2.5rem, 11vw, 4.5rem);
   margin: 0.25rem 0;
-  background: linear-gradient(90deg, var(--pink), var(--purple));
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--gold);
+  text-shadow: 0 2px 0 var(--crimson), 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
 .hero__subtitle {
-  font-size: 1.1rem;
-  color: var(--pink-dark);
+  font-size: 1.2rem;
   margin: 0;
+  color: var(--ink);
+  opacity: 0.95;
 }
 
-/* ---------- Cards ---------- */
-.card {
-  background: var(--card);
-  border-radius: var(--radius);
-  padding: 1.5rem;
+/* ---------- Countdown stage ---------- */
+.stage {
+  min-height: 9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown {
+  font-size: clamp(6rem, 28vw, 12rem);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--gold);
+  text-shadow: 0 0 30px rgba(255, 210, 77, 0.8), 0 6px 0 var(--crimson);
+  animation: pop 1s ease;
+}
+
+/* re-trigger the pop animation on each tick via class toggle */
+.countdown.tick {
+  animation: none;
+}
+
+/* ---------- Joke reveal ---------- */
+.joke {
+  background: rgba(160, 0, 20, 0.55);
+  border: 3px solid var(--gold);
+  border-radius: 20px;
+  padding: 1.5rem 1.75rem;
   box-shadow: var(--shadow);
-  text-align: center;
+  animation: pop 0.6s ease;
+  backdrop-filter: blur(2px);
 }
 
-.card h2 {
-  margin-top: 0;
-  font-size: 1.25rem;
-  color: var(--pink-dark);
+.joke__zh {
+  font-size: 1.8rem;
+  margin: 0 0 0.25rem;
+  color: var(--gold);
 }
 
-.compliment {
-  font-size: 1.3rem;
-  min-height: 3rem;
-  margin: 1rem 0;
-  font-weight: 600;
+.joke__punch {
+  font-size: 2.2rem;
+  font-weight: 900;
+  margin: 0 0 0.75rem;
+  color: #fff;
+  text-shadow: 0 0 18px rgba(255, 210, 77, 0.9);
 }
 
-.counter strong {
-  font-size: 1.6rem;
-  color: var(--pink);
+.joke__pinyin {
+  font-size: 1rem;
+  font-style: italic;
+  opacity: 0.85;
+  margin: 0.25rem 0;
 }
 
-/* ---------- Buttons ---------- */
+.joke__en {
+  font-size: 1.05rem;
+  margin: 0.5rem 0 0;
+}
+
+/* ---------- Button ---------- */
 .btn {
   border: none;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 1.8rem;
   border-radius: 999px;
-  color: #fff;
-  background: linear-gradient(90deg, var(--pink), var(--pink-dark));
-  box-shadow: 0 6px 16px rgba(224, 67, 111, 0.35);
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  color: var(--crimson);
+  background: linear-gradient(90deg, var(--gold), var(--gold-deep));
+  box-shadow: var(--shadow);
+  transition: transform 0.1s ease;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(224, 67, 111, 0.45);
-}
-
-.btn:active {
-  transform: translateY(1px) scale(0.98);
-}
-
-.btn--secondary {
-  background: linear-gradient(90deg, var(--purple), #7a4dff);
-  box-shadow: 0 6px 16px rgba(123, 77, 255, 0.35);
-}
+.btn:hover { transform: translateY(-2px); }
+.btn:active { transform: translateY(1px) scale(0.98); }
 
 /* ---------- Footer ---------- */
 .footer {
-  text-align: center;
-  color: var(--pink-dark);
-  font-size: 0.9rem;
-  opacity: 0.8;
+  color: var(--gold);
+  font-size: 0.95rem;
+  opacity: 0.9;
 }
 
-/* ---------- Motion ---------- */
-@keyframes bob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+/* ---------- Animations ---------- */
+@keyframes festive {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes sway {
+  0%, 100% { transform: rotate(-4deg); }
+  50% { transform: rotate(4deg); }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.3); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .hero__emoji { animation: none; }
-  .btn { transition: none; }
+  body { animation: none; }
+  .lanterns, .countdown, .joke { animation: none; }
 }
