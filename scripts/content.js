@@ -69,6 +69,22 @@
 
     // Sweets that rain down with the fireworks.
     CANDY: ["🍬", "🍭", "🍡", "🥮", "🧁", "🍥", "🧧", "🍮"],
+
+    // Redeemable "treat coupons" hidden inside the lucky red envelopes.
+    // TODO (Jon): make these real — favorite restaurant, inside jokes, etc.
+    COUPONS: [
+      "🥟 Coupon: one homemade dumpling dinner, on me.",
+      "🧋 Coupon: a boba run — your order, my treat.",
+      "💆 Coupon: a 15-minute shoulder rub, no questions asked.",
+      "🌷 Coupon: fresh flowers, just because.",
+      "🍰 Coupon: dessert first tonight — rules don't apply.",
+      "🎬 Coupon: movie night, you pick, I make the snacks.",
+      "☕ Coupon: breakfast in bed this weekend.",
+      "🤗 Coupon: one extra-long hug, redeemable anytime.",
+    ],
+
+    // Emoji used as pairs in the memory-match game (each appears twice).
+    MEMORY: ["🥟", "🍜", "🧋", "🥮", "🍡", "🍤"],
   };
 
   if (typeof module !== "undefined" && module.exports) {

@@ -44,17 +44,9 @@ body {
   padding: calc(2rem + env(safe-area-inset-top)) 1rem
            calc(4rem + env(safe-area-inset-bottom));
 
-  background: linear-gradient(
-    135deg,
-    #d4001a,
-    #ff5e3a,
-    #ff2d55,
-    #c2003d,
-    #ff9500,
-    #d4001a
-  );
-  background-size: 400% 400%;
-  animation: festive 14s ease infinite;
+  /* Static festive gradient — no animated shift (avoids the iOS Safari
+     full-page red repaint/flash while scrolling). Fixed so it doesn't move. */
+  background: linear-gradient(160deg, #d4001a 0%, #c2003d 45%, #b3001f 100%) fixed;
 }
 
 /* Fireworks canvas + drifting food sit behind the content. */
@@ -77,29 +69,6 @@ body {
   will-change: transform;
   animation: drift linear infinite;
 }
-
-/* Music toggle, pinned to a corner (clear of the notch). */
-#music-toggle {
-  position: fixed;
-  top: calc(12px + env(safe-area-inset-top));
-  right: calc(12px + env(safe-area-inset-right));
-  z-index: 3;
-  width: 48px;   /* >= 44px Apple tap target */
-  height: 48px;
-  border: 2px solid var(--gold);
-  border-radius: 50%;
-  background: rgba(160, 0, 20, 0.6);
-  color: var(--gold);
-  font-size: 1.3rem;
-  cursor: pointer;
-  touch-action: manipulation; /* no 300ms delay / double-tap zoom */
-  -webkit-tap-highlight-color: transparent;
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
-  transition: transform 0.1s ease;
-}
-#music-toggle:hover { transform: scale(1.08); }
-#music-toggle[aria-pressed="true"] { background: rgba(245, 166, 35, 0.8); }
 
 .page {
   position: relative;
@@ -247,6 +216,75 @@ body {
 .garden__count { margin: 0.85rem 0 0; font-size: 1.1rem; }
 .garden__count strong { color: var(--gold); font-size: 1.35rem; }
 
+/* ---------- Lucky red envelopes ---------- */
+.envelope-row {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.envelope {
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: 3.2rem;
+  line-height: 1;
+  padding: 0.25rem 0.4rem;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 0.12s ease;
+}
+.envelope:hover { transform: translateY(-4px) scale(1.06); }
+.envelope.open { animation: shake 0.5s ease; }
+
+.envelope__text {
+  margin: 0.9rem auto 0;
+  max-width: 28rem;
+  font-size: 1.15rem;
+  min-height: 2.5rem;
+  color: var(--ink);
+}
+
+/* ---------- Memory match game ---------- */
+.memory__status { margin: 0 0 0.85rem; font-size: 1.1rem; color: var(--ink); }
+
+.memory-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.6rem;
+  max-width: 360px;
+  margin: 0 auto 1rem;
+}
+.card-tile {
+  aspect-ratio: 1 / 1;
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  background: linear-gradient(145deg, #b3001f, #7c0016);
+  color: transparent;
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+.card-tile::before { content: "🀄"; color: var(--gold); opacity: 0.55; }
+.card-tile.flipped,
+.card-tile.matched {
+  background: rgba(255, 247, 230, 0.95);
+  color: #000;
+}
+.card-tile.flipped::before,
+.card-tile.matched::before { content: ""; }
+.card-tile.matched { border-color: #6fdc6f; box-shadow: 0 0 12px rgba(111, 220, 111, 0.7); }
+.card-tile.flipped { transform: scale(1.05); }
+
 /* ---------- Button ---------- */
 .btn {
   border: none;
@@ -265,16 +303,12 @@ body {
 }
 .btn:hover { transform: translateY(-2px); }
 .btn:active { transform: translateY(1px) scale(0.98); }
+.btn--small { font-size: 0.95rem; padding: 0.6rem 1.2rem; min-height: 40px; }
 
 /* ---------- Footer ---------- */
 .footer { color: var(--gold); font-size: 0.95rem; opacity: 0.9; }
 
 /* ---------- Animations ---------- */
-@keyframes festive {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
 @keyframes sway {
   0%, 100% { transform: rotate(-4deg); }
   50% { transform: rotate(4deg); }
@@ -294,6 +328,12 @@ body {
   60% { transform: scale(0.9) rotate(6deg); }
   100% { transform: scale(1) rotate(0); }
 }
+@keyframes shake {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  25% { transform: translateY(-6px) rotate(-6deg); }
+  50% { transform: translateY(-2px) rotate(5deg); }
+  75% { transform: translateY(-5px) rotate(-3deg); }
+}
 @keyframes sprout {
   0% { transform: translateX(-50%) scale(0) translateY(10px); }
   70% { transform: translateX(-50%) scale(1.2) translateY(0); }
@@ -305,7 +345,7 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body, .lanterns, .countdown, .joke, .cookie, .flower, .food {
+  .lanterns, .countdown, .joke, .cookie, .flower, .food, .envelope {
     animation: none !important;
   }
 }

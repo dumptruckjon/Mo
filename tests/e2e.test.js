@@ -62,12 +62,56 @@ test("garden plants a flower and increments the counter", async () => {
   assert.ok(flowers.length >= 1, "a flower element should be planted");
 });
 
-test("music toggle flips on and off", async () => {
-  assert.equal(await page.getAttribute("#music-toggle", "aria-pressed"), "false");
-  await page.click("#music-toggle", { force: true });
-  assert.equal(await page.getAttribute("#music-toggle", "aria-pressed"), "true");
-  await page.click("#music-toggle", { force: true });
-  assert.equal(await page.getAttribute("#music-toggle", "aria-pressed"), "false");
+test("a red envelope reveals a coupon when tapped", async () => {
+  const before = (await page.textContent("#envelope-text")).trim();
+  await page.locator("#envelopes .envelope").first().click({ force: true });
+  await page.waitForFunction(
+    (b) => document.getElementById("envelope-text").textContent.trim() !== b,
+    before, { timeout: 3000 }
+  );
+  const after = (await page.textContent("#envelope-text")).trim();
+  assert.notEqual(after, before, "coupon text should change");
+  assert.match(after, /Coupon/i, "should reveal a coupon");
+});
+
+test("memory game: a board renders and a known pair matches", async () => {
+  const tiles = page.locator("#memory-grid .card-tile");
+  assert.equal(await tiles.count(), 12, "expected 12 cards (6 pairs)");
+
+  // Find two cards with the same hidden emoji and match them.
+  const emojis = await tiles.evaluateAll((els) => els.map((e) => e.dataset.emoji));
+  const idxA = 0;
+  const idxB = emojis.indexOf(emojis[idxA], 1);
+  assert.ok(idxB > 0, "should find a matching pair");
+
+  await tiles.nth(idxA).click();
+  await tiles.nth(idxB).click();
+  await page.waitForFunction(
+    (i) => document.querySelectorAll("#memory-grid .card-tile")[i].classList.contains("matched"),
+    idxA, { timeout: 3000 }
+  );
+  assert.ok(await tiles.nth(idxA).evaluate((e) => e.classList.contains("matched")));
+  assert.ok(await tiles.nth(idxB).evaluate((e) => e.classList.contains("matched")));
+});
+
+test("memory game: solving the whole board wins", async () => {
+  await page.click("#memory-new"); // fresh board
+  const tiles = page.locator("#memory-grid .card-tile");
+  const emojis = await tiles.evaluateAll((els) => els.map((e) => e.dataset.emoji));
+
+  // Group indices by emoji and click each pair in turn.
+  const byEmoji = {};
+  emojis.forEach((e, i) => { (byEmoji[e] = byEmoji[e] || []).push(i); });
+  for (const idxs of Object.values(byEmoji)) {
+    await tiles.nth(idxs[0]).click();
+    await tiles.nth(idxs[1]).click();
+    await page.waitForFunction(
+      (i) => document.querySelectorAll("#memory-grid .card-tile")[i].classList.contains("matched"),
+      idxs[0], { timeout: 3000 }
+    );
+  }
+  const status = (await page.textContent("#memory-status")).trim();
+  assert.match(status, /did it/i, `expected a win message, got "${status}"`);
 });
 
 test("fireworks fire only after the countdown — not on tap or scroll", async () => {

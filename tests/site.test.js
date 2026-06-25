@@ -29,9 +29,11 @@ test("index.html has all required UI hooks", () => {
   const html = read("index.html");
   const ids = [
     'id="countdown"', 'id="joke"', 'id="restart"', 'id="fireworks"',
-    'id="food-bg"', 'id="music-toggle"',
+    'id="food-bg"',
     'id="fortune-cookie"', 'id="fortune-text"',
     'id="garden"', 'id="flower-count"',
+    'id="envelopes"', 'id="envelope-text"',
+    'id="memory-grid"', 'id="memory-status"', 'id="memory-new"',
     'id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"',
   ];
   for (const id of ids) assert.ok(html.includes(id), `missing element ${id}`);
@@ -66,16 +68,25 @@ test("garden has flowers and the background has foods/candy", () => {
   assert.ok(content.CANDY.length >= 3, "need some candy");
 });
 
+test("there are redeemable coupons and memory-match pairs", () => {
+  assert.ok(Array.isArray(content.COUPONS) && content.COUPONS.length >= 5,
+    `expected >= 5 coupons, got ${content.COUPONS && content.COUPONS.length}`);
+  for (const c of content.COUPONS) assert.ok(typeof c === "string" && c.length > 0, "empty coupon");
+  assert.ok(Array.isArray(content.MEMORY) && content.MEMORY.length >= 4,
+    `expected >= 4 memory pairs, got ${content.MEMORY && content.MEMORY.length}`);
+});
+
 // ---------- Behavior wiring (main.js) ----------
 test("main.js wires up every feature", () => {
   const js = read("scripts/main.js");
   for (const sym of [
     "initFoodBackground", "initCountdown", "initFortuneCookie",
-    "initGarden", "initMusic", "createFireworks",
-    "reachZero", "AudioContext", "mo-flower-count",
+    "initGarden", "initEnvelopes", "initMemory", "createFireworks",
+    "reachZero", "mo-flower-count",
   ]) {
     assert.ok(js.includes(sym), `main.js missing ${sym}`);
   }
+  assert.ok(!js.includes("initMusic"), "music should be removed");
 });
 
 test("selection is randomized", () => {
@@ -91,8 +102,17 @@ test("fireworks are not bound to global tap/click/scroll", () => {
   assert.match(js, /celebrate\(\)/, "fireworks should still fire via celebrate()");
 });
 
-test("festive background animation is defined", () => {
-  assert.match(read("styles/main.css"), /@keyframes\s+festive/);
+test("background is a static festive gradient (no animated shift)", () => {
+  const css = read("styles/main.css");
+  assert.match(css, /linear-gradient\(/, "should have a gradient background");
+  assert.ok(!/animation:\s*festive/.test(css), "background should not animate/shift");
+  assert.ok(!/@keyframes\s+festive/.test(css), "festive keyframes should be removed");
+});
+
+test("the music feature is fully removed", () => {
+  assert.ok(!read("index.html").includes("music-toggle"), "music button still in HTML");
+  assert.ok(!/AudioContext/.test(read("scripts/main.js")), "audio code still present");
+  assert.ok(!read("styles/main.css").includes("#music-toggle"), "music styles still present");
 });
 
 test("mobile / iOS Safari optimizations are in place", () => {

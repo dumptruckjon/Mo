@@ -117,20 +117,25 @@ Update this tree whenever files are added or moved.
 A little festival built around the things Mo loves (Chinese food, gardening,
 sweets):
 
-- A festive, animated red/gold background with **gently drifting Chinese food**
-  (dumplings, noodles, bubble tea, mooncakes…).
+- A festive red/gold background (a **static** gradient — intentionally not
+  animated, to avoid the iOS Safari full-page repaint/flash on scroll) with
+  **gently drifting Chinese food** (dumplings, noodles, bubble tea, mooncakes…).
 - A **countdown from 5 → 0**, then a **random** short joke in Simplified Chinese
   (pinyin + English) with **fireworks that also rain sweets/candy**. A different
   joke shows each time (never the same one twice in a row). "Again" replays with
   a fresh joke. Fireworks fire **only** at the end of the countdown (and on
-  "Again") — never on taps or scrolling — and the canvas sits transparent/idle
-  the rest of the time.
+  "Again" / a memory-game win) — never on taps or scrolling — and the canvas
+  sits transparent/idle the rest of the time.
 - A **fortune cookie** 🥠 — tap it to crack open a random sweet love-note.
 - A **grow-a-garden** 🌷 — tap the soil to plant flowers; a counter remembers how
   many flowers have been grown for Mo (saved in `localStorage`).
-- A **soft music toggle** 🎵 in the corner — a gentle pentatonic melody
-  synthesized live via the Web Audio API (no audio file, never autoplays).
-- All wording lives in `scripts/content.js` for easy personalization.
+- **Lucky red envelopes** 🧧 — tap one to reveal a random redeemable "treat
+  coupon" (a dumpling dinner, boba run, dessert-first night…).
+- **Sweet memory match** 🀄 — a find-the-pairs game with Chinese food/sweet
+  tiles; completing it shows a win message and sets off the fireworks.
+- All wording lives in `scripts/content.js` for easy personalization (jokes,
+  fortunes, coupons, flowers, foods, memory tiles).
+- (Removed: the background music toggle.)
 
 ## Development Workflow
 

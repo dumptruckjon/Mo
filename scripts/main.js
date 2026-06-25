@@ -19,7 +19,8 @@
     initCountdown(fireworks);
     initFortuneCookie();
     initGarden();
-    initMusic();
+    initEnvelopes();
+    initMemory(fireworks);
   });
 
   // ---------- Floating Chinese food ----------
@@ -142,61 +143,108 @@
     });
   }
 
-  // ---------- Soft music (Web Audio, synthesized — no asset, no autoplay) ----------
-  function initMusic() {
-    const toggle = document.getElementById("music-toggle");
-    if (!toggle) return;
+  // ---------- Lucky red envelopes ----------
+  function initEnvelopes() {
+    const row = document.getElementById("envelopes");
+    const text = document.getElementById("envelope-text");
+    if (!row || !text || !C.COUPONS) return;
+    let last = -1;
 
-    let ctx = null;
-    let schedulerId = null;
-    let step = 0;
-    // A gentle pentatonic scale (C D E G A across two octaves).
-    const SCALE = [261.63, 293.66, 329.63, 392.0, 440.0, 523.25, 587.33, 659.25];
-
-    function playNote(freq) {
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.type = "triangle";
-      osc.frequency.value = freq;
-      const now = ctx.currentTime;
-      gain.gain.setValueAtTime(0, now);
-      gain.gain.linearRampToValueAtTime(0.12, now + 0.04); // soft attack
-      gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.1); // gentle decay
-      osc.connect(gain).connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now + 1.2);
-    }
-
-    function startMusic() {
-      ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
-      if (ctx.state === "suspended") ctx.resume();
-      step = 0;
-      schedulerId = setInterval(() => {
-        // A wandering, pleasant melody.
-        const idx = Math.floor(Math.random() * SCALE.length);
-        playNote(SCALE[idx]);
-        step += 1;
-      }, 620);
-    }
-
-    function stopMusic() {
-      clearInterval(schedulerId);
-      schedulerId = null;
-      if (ctx && ctx.state === "running") ctx.suspend();
-    }
-
-    toggle.addEventListener("click", () => {
-      const on = toggle.getAttribute("aria-pressed") === "true";
-      if (on) {
-        stopMusic();
-        toggle.setAttribute("aria-pressed", "false");
-        toggle.textContent = "🔇";
-      } else {
-        startMusic();
-        toggle.setAttribute("aria-pressed", "true");
-        toggle.textContent = "🎵";
-      }
+    row.querySelectorAll(".envelope").forEach((env) => {
+      env.addEventListener("click", () => {
+        env.classList.remove("open");
+        void env.offsetWidth; // restart the animation
+        env.classList.add("open");
+        last = pickIndex(C.COUPONS.length, last);
+        text.textContent = C.COUPONS[last];
+      });
     });
+  }
+
+  // ---------- Sweet memory match ----------
+  function initMemory(fireworks) {
+    const grid = document.getElementById("memory-grid");
+    const status = document.getElementById("memory-status");
+    const newBtn = document.getElementById("memory-new");
+    if (!grid || !status || !C.MEMORY) return;
+
+    const pairs = C.MEMORY.length;
+    let first = null;      // the first flipped card awaiting a match
+    let lock = false;      // ignore taps during the flip-back delay
+    let matched = 0;
+    let moves = 0;
+
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function newGame() {
+      first = null;
+      lock = false;
+      matched = 0;
+      moves = 0;
+      status.textContent = "Find all the pairs!";
+      grid.innerHTML = "";
+      const deck = shuffle([...C.MEMORY, ...C.MEMORY]);
+      deck.forEach((emoji) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "card-tile";
+        card.dataset.emoji = emoji;
+        card.setAttribute("aria-label", "memory card");
+        card.textContent = "";
+        card.addEventListener("click", () => flip(card));
+        grid.appendChild(card);
+      });
+    }
+
+    function flip(card) {
+      if (lock) return;
+      if (card.classList.contains("flipped") || card.classList.contains("matched")) return;
+
+      card.classList.add("flipped");
+      card.textContent = card.dataset.emoji;
+
+      if (!first) {
+        first = card;
+        return;
+      }
+
+      moves += 1;
+      if (first.dataset.emoji === card.dataset.emoji) {
+        // Match!
+        first.classList.add("matched");
+        card.classList.add("matched");
+        first = null;
+        matched += 1;
+        if (matched === pairs) {
+          status.textContent = `You did it in ${moves} moves! 💖`;
+          if (fireworks) fireworks.celebrate();
+        } else {
+          status.textContent = `Nice! ${matched}/${pairs} pairs`;
+        }
+      } else {
+        // No match — flip both back shortly.
+        lock = true;
+        const a = first;
+        first = null;
+        setTimeout(() => {
+          a.classList.remove("flipped");
+          a.textContent = "";
+          card.classList.remove("flipped");
+          card.textContent = "";
+          lock = false;
+        }, 800);
+      }
+    }
+
+    if (newBtn) newBtn.addEventListener("click", newGame);
+    newGame();
   }
 
   // ---------- Fireworks + candy (canvas particle system) ----------

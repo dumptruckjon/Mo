@@ -54,9 +54,13 @@ test("the viewport meta opts into safe areas", async () => {
 });
 
 test("primary tap targets meet the 44px minimum", async () => {
-  const music = await page.locator("#music-toggle").boundingBox();
-  assert.ok(music && music.width >= 44 && music.height >= 44,
-    `music toggle too small: ${JSON.stringify(music)}`);
+  const cookie = await page.locator("#fortune-cookie").boundingBox();
+  assert.ok(cookie && cookie.width >= 44 && cookie.height >= 44,
+    `cookie too small: ${JSON.stringify(cookie)}`);
+
+  const envelope = await page.locator("#envelopes .envelope").first().boundingBox();
+  assert.ok(envelope && envelope.width >= 44 && envelope.height >= 44,
+    `envelope too small: ${JSON.stringify(envelope)}`);
 
   await page.waitForSelector("#restart:not([hidden])", { timeout: 9000 });
   const again = await page.locator("#restart").boundingBox();

@@ -20,9 +20,6 @@
   <!-- Gently drifting Chinese food. Populated by JS. -->
   <div id="food-bg" aria-hidden="true"></div>
 
-  <!-- Soft music toggle (never autoplays). -->
-  <button id="music-toggle" type="button" aria-pressed="false" title="Toggle music">🔇</button>
-
   <main class="page">
     <header class="hero">
       <div class="lanterns" aria-hidden="true">🏮 🧧 🏮</div>
@@ -59,6 +56,25 @@
       <div class="soil" id="garden" role="button" tabindex="0"
            aria-label="Garden soil — tap or press Enter to plant a flower"></div>
       <p class="garden__count">🌸 <strong id="flower-count">0</strong> flowers grown for Mo</p>
+    </section>
+
+    <!-- Lucky red envelopes: tap one to reveal a redeemable treat coupon. -->
+    <section class="card envelopes" aria-labelledby="env-h">
+      <h2 id="env-h">Pick a lucky red envelope 🧧</h2>
+      <div class="envelope-row" id="envelopes">
+        <button class="envelope" type="button" aria-label="Open a red envelope">🧧</button>
+        <button class="envelope" type="button" aria-label="Open a red envelope">🧧</button>
+        <button class="envelope" type="button" aria-label="Open a red envelope">🧧</button>
+      </div>
+      <p class="envelope__text" id="envelope-text">Tap an envelope to open it…</p>
+    </section>
+
+    <!-- Sweet memory match game. -->
+    <section class="card memory" aria-labelledby="mem-h">
+      <h2 id="mem-h">Match the treats 🀄</h2>
+      <p class="memory__status" id="memory-status">Find all the pairs!</p>
+      <div class="memory-grid" id="memory-grid"></div>
+      <button class="btn btn--small" id="memory-new" type="button">New game 🔄</button>
     </section>
 
     <footer class="footer">
