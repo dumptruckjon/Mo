@@ -35,8 +35,12 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   const req = event.request;
   if (req.method !== "GET") return;
+  // For page navigations, bypass the HTTP cache so a fresh deploy shows
+  // immediately when online (falls back to cache only when offline).
+  const isNav = req.mode === "navigate";
+  const fetchReq = isNav ? new Request(req, { cache: "no-store" }) : req;
   event.respondWith(
-    fetch(req)
+    fetch(fetchReq)
       .then((res) => {
         const copy = res.clone();
         caches.open(CACHE).then((cache) => cache.put(req, copy)).catch(() => {});
