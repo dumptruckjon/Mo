@@ -83,9 +83,11 @@ Tests passing on local files is NOT proof the deployed site works. A change is
 This rule exists because shipping new features without cache-busting once served
 users stale JS — the features were dead on real devices while every local test
 passed.
-- **Cache-bust every asset.** Asset URLs in `index.html` carry `?v=dev`, which
-  the deploy job rewrites to the commit SHA (`?v=<sha>`). Never reference a JS/CSS
-  asset without the version query — stale caches are a shipping bug.
+- **Cache-bust every asset.** Asset URLs in `index.html` (and the cache name in
+  `sw.js`) carry the `__BUILD__` token, which the deploy job rewrites to the
+  commit SHA. Never reference a JS/CSS asset without the version query, and bump
+  the SW cache on changes — stale caches are a shipping bug (this rule exists
+  because a stale cached `main.js` once shipped dead features to the user).
 - **Verify the deployed site, not just local files.** CI's `verify-live` job
   waits for the live URL to serve the new commit, then runs the full browser
   suite (Chromium **and** WebKit) against the **live** URL via `MO_BASE_URL`. A
@@ -108,12 +110,15 @@ tooling.
 ```
 .
 ├── index.html                  # Site entry point (markup + the festival sections)
+├── manifest.webmanifest        # PWA manifest (installable, standalone, icons)
+├── sw.js                       # Service worker (network-first; offline support)
+├── assets/                     # PWA icons (192/512/maskable/apple-touch)
 ├── styles/
-│   └── main.css                # All styling: festival bg, countdown, joke, cookie, garden, food, music
+│   └── main.css                # All styling: festival bg, countdown, joke, cookie, garden, food, daily
 ├── scripts/
-│   ├── content.js              # ALL editable content (jokes, fortunes, flowers, foods, candy). Edit here.
-│   └── main.js                 # Vanilla JS behavior: countdown, fireworks+candy, fortune cookie,
-│                               #   garden, floating food, synthesized music. Reads window.MoContent.
+│   ├── content.js              # ALL editable content (jokes, fortunes, coupons, daily notes, etc). Edit here.
+│   └── main.js                 # Vanilla JS behavior: daily note, countdown, fireworks+candy, cookie,
+│                               #   garden, envelopes, memory, SW registration. Reads window.MoContent.
 ├── tests/
 │   ├── site.test.js            # node:test unit/structure/logic tests (no browser)
 │   ├── e2e.test.js             # Playwright browser tests — actually click every feature
@@ -154,8 +159,13 @@ sweets):
   coupon" (a dumpling dinner, boba run, dessert-first night…).
 - **Sweet memory match** 🀄 — a find-the-pairs game with Chinese food/sweet
   tiles; completing it shows a win message and sets off the fireworks.
+- **Daily love note** 💌 — a different note each day (date-seeded: same all day,
+  changes daily; no backend).
+- **Installable PWA** — `manifest.webmanifest` + `sw.js` make it add-to-home-screen
+  installable with a custom 🏮 icon/splash, and it **works offline** (the service
+  worker is network-first: fresh when online, cached when offline).
 - All wording lives in `scripts/content.js` for easy personalization (jokes,
-  fortunes, coupons, flowers, foods, memory tiles).
+  fortunes, coupons, flowers, foods, memory tiles, daily notes).
 - (Removed: the background music toggle.)
 
 ## Development Workflow

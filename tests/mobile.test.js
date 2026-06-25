@@ -120,6 +120,11 @@ test("New game re-renders a full board (touch)", async () => {
   assert.equal(await page.locator("#memory-grid .card-tile").count(), 12);
 });
 
+test("the daily note renders", async () => {
+  const note = (await page.textContent("#daily-note")).trim();
+  assert.ok(note.length > 0 && note !== "…", "daily note should be filled in");
+});
+
 test("no uncaught page errors on mobile", () => {
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join("; ")}`);
 });

@@ -153,6 +153,14 @@ body {
 
 .card h2 { margin: 0 0 0.75rem; color: var(--gold); font-size: 1.4rem; }
 
+/* ---------- Daily note ---------- */
+.daily__text {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.4;
+  color: var(--ink);
+}
+
 /* ---------- Fortune cookie ---------- */
 .cookie {
   border: none;

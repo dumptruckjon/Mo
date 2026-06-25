@@ -11,7 +11,10 @@
   <meta name="apple-mobile-web-app-title" content="Hi Mo" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="theme-color" content="#d4001a" />
-  <link rel="stylesheet" href="styles/main.css?v=dev" />
+  <!-- PWA: installable to the home screen, works offline. -->
+  <link rel="manifest" href="manifest.webmanifest?v=__BUILD__" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="stylesheet" href="styles/main.css?v=__BUILD__" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏮</text></svg>" />
 </head>
 <body>
@@ -26,6 +29,12 @@
       <h1 class="hero__title">Hi&nbsp;Mo!</h1>
       <p class="hero__subtitle">A tiny festival, just for you. 准备好了吗？</p>
     </header>
+
+    <!-- A new little note every day. -->
+    <section class="card daily" aria-labelledby="daily-h">
+      <h2 id="daily-h">💌 Today's note</h2>
+      <p class="daily__text" id="daily-note">…</p>
+    </section>
 
     <section class="stage" aria-live="polite">
       <!-- The big countdown number. -->
@@ -82,8 +91,8 @@
     </footer>
   </main>
 
-  <!-- ?v=dev is rewritten to the commit SHA at deploy time for cache-busting. -->
-  <script src="scripts/content.js?v=dev" defer></script>
-  <script src="scripts/main.js?v=dev" defer></script>
+  <!-- __BUILD__ is rewritten to the commit SHA at deploy time for cache-busting. -->
+  <script src="scripts/content.js?v=__BUILD__" defer></script>
+  <script src="scripts/main.js?v=__BUILD__" defer></script>
 </body>
 </html>

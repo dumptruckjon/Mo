@@ -140,6 +140,40 @@ test("fireworks fire only after the countdown — not on tap or scroll", async (
     "fireworks should be drawn after the countdown");
 });
 
+test("the daily note shows and is stable on reload (same day)", async () => {
+  const note1 = (await page.textContent("#daily-note")).trim();
+  assert.ok(note1.length > 0 && note1 !== "…", "daily note should be filled in");
+  await page.reload({ waitUntil: "load" });
+  const note2 = (await page.textContent("#daily-note")).trim();
+  assert.equal(note2, note1, "same day should show the same note");
+});
+
+test("PWA: the service worker registers", async () => {
+  await page.waitForFunction(
+    async () => !!(await navigator.serviceWorker.getRegistration()),
+    null, { timeout: 5000 }
+  );
+  const has = await page.evaluate(async () => !!(await navigator.serviceWorker.getRegistration()));
+  assert.ok(has, "a service worker should be registered");
+});
+
+test("PWA: the site still loads offline (served from cache)", async () => {
+  // Make sure the SW is active and controlling, then go offline and reload.
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.waitForFunction(() => !!navigator.serviceWorker.controller, null, { timeout: 5000 });
+  const ctx = page.context();
+  await ctx.setOffline(true);
+  try {
+    await page.reload({ waitUntil: "load" });
+    await page.waitForSelector("h1.hero__title", { timeout: 5000 });
+    assert.match((await page.textContent("h1.hero__title")).trim(), /Mo/);
+    // Interactive JS should still be alive offline.
+    assert.equal(await page.locator("#memory-grid .card-tile").count(), 12);
+  } finally {
+    await ctx.setOffline(false);
+  }
+});
+
 test("no uncaught page errors occurred during interaction", () => {
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join("; ")}`);
 });

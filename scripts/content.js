@@ -85,6 +85,27 @@
 
     // Emoji used as pairs in the memory-match game (each appears twice).
     MEMORY: ["🥟", "🍜", "🧋", "🥮", "🍡", "🍤"],
+
+    // A different one of these shows each day (date-seeded, same all day).
+    // TODO (Jon): swap in personal ones whenever you like.
+    DAILY_NOTES: [
+      "Day after day, it's still you. 💖",
+      "Good morning to the best part of my day.",
+      "You + me = my favorite equation.",
+      "If I had to do it all again, I'd pick you faster.",
+      "You make ordinary days feel like a celebration.",
+      "Somewhere right now, I'm thinking about you.",
+      "You're my favorite hello and my hardest goodbye.",
+      "Lucky isn't a strong enough word for having you.",
+      "Today's forecast: 100% chance of loving you.",
+      "You're proof my best decisions weren't accidents.",
+      "Every day with you is my favorite day. (Yes, again.)",
+      "You're the sweetest thing on any menu. 🍰",
+      "Home isn't a place — it's wherever you are.",
+      "Still smitten. Still yours.",
+      "Thanks for being my favorite person, today and always.",
+      "I'd cross any room just to get to you.",
+    ],
   };
 
   if (typeof module !== "undefined" && module.exports) {

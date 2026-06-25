@@ -10,6 +10,7 @@ const ROOT = path.join(__dirname, "..");
 const MIME = {
   ".html": "text/html", ".css": "text/css", ".js": "text/javascript",
   ".svg": "image/svg+xml", ".json": "application/json",
+  ".webmanifest": "application/manifest+json", ".png": "image/png",
 };
 
 // Prefer the browser Playwright expects; otherwise scan the preinstalled dir.

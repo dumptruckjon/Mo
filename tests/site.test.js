@@ -41,7 +41,7 @@ test("index.html has all required UI hooks", () => {
   const html = read("index.html");
   const ids = [
     'id="countdown"', 'id="joke"', 'id="restart"', 'id="fireworks"',
-    'id="food-bg"',
+    'id="food-bg"', 'id="daily-note"',
     'id="fortune-cookie"', 'id="fortune-text"',
     'id="garden"', 'id="flower-count"',
     'id="envelopes"', 'id="envelope-text"',
@@ -88,12 +88,40 @@ test("there are redeemable coupons and memory-match pairs", () => {
     `expected >= 4 memory pairs, got ${content.MEMORY && content.MEMORY.length}`);
 });
 
+test("there are daily notes (one per day)", () => {
+  assert.ok(Array.isArray(content.DAILY_NOTES) && content.DAILY_NOTES.length >= 7,
+    `expected >= 7 daily notes, got ${content.DAILY_NOTES && content.DAILY_NOTES.length}`);
+  for (const n of content.DAILY_NOTES) assert.ok(typeof n === "string" && n.length > 0, "empty note");
+});
+
+test("PWA: manifest, icons, service worker are wired up", () => {
+  const html = read("index.html");
+  assert.match(html, /rel="manifest"/, "manifest link missing");
+  assert.match(html, /rel="apple-touch-icon"/, "apple-touch-icon link missing");
+
+  const manifest = JSON.parse(read("manifest.webmanifest"));
+  assert.equal(manifest.display, "standalone", "manifest should be standalone");
+  assert.ok(manifest.start_url, "manifest needs start_url");
+  const sizes = (manifest.icons || []).map((i) => i.sizes);
+  assert.ok(sizes.includes("192x192") && sizes.includes("512x512"), "need 192 & 512 icons");
+  for (const icon of manifest.icons) {
+    assert.ok(fs.existsSync(path.join(root, icon.src)), `missing icon file ${icon.src}`);
+  }
+
+  const sw = read("sw.js");
+  assert.match(sw, /addEventListener\(\s*["']fetch["']/, "SW needs a fetch handler");
+  assert.match(sw, /addEventListener\(\s*["']install["']/, "SW needs an install handler");
+
+  const js = read("scripts/main.js");
+  assert.match(js, /serviceWorker\.register/, "main.js should register the SW");
+});
+
 // ---------- Behavior wiring (main.js) ----------
 test("main.js wires up every feature", () => {
   const js = read("scripts/main.js");
   for (const sym of [
     "initFoodBackground", "initCountdown", "initFortuneCookie",
-    "initGarden", "initEnvelopes", "initMemory", "createFireworks",
+    "initGarden", "initEnvelopes", "initMemory", "initDailyNote", "createFireworks",
     "reachZero", "mo-flower-count",
   ]) {
     assert.ok(js.includes(sym), `main.js missing ${sym}`);

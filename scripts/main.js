@@ -17,6 +17,7 @@
     const fireworks = createFireworks(document.getElementById("fireworks"));
     // Isolate each feature: if one throws, the others still work.
     const features = [
+      initDailyNote,
       initFoodBackground,
       () => initCountdown(fireworks),
       initFortuneCookie,
@@ -28,6 +29,23 @@
       try { init(); } catch (e) { console.error("Mo: a feature failed to start:", e); }
     }
   });
+
+  // Register the service worker (PWA / offline). Best-effort; never blocks the UI.
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch((e) =>
+        console.warn("Mo: service worker registration failed:", e)
+      );
+    });
+  }
+
+  // ---------- Daily love note (date-seeded: same all day, changes each day) ----------
+  function initDailyNote() {
+    const el = document.getElementById("daily-note");
+    if (!el || !C.DAILY_NOTES || !C.DAILY_NOTES.length) return;
+    const dayNumber = Math.floor(Date.now() / 86400000); // whole days since epoch
+    el.textContent = C.DAILY_NOTES[dayNumber % C.DAILY_NOTES.length];
+  }
 
   // ---------- Floating Chinese food ----------
   function initFoodBackground() {
