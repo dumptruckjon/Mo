@@ -84,6 +84,13 @@ test("selection is randomized", () => {
   assert.match(js, /pickIndex/);
 });
 
+test("fireworks are not bound to global tap/click/scroll", () => {
+  const js = read("scripts/main.js");
+  assert.ok(!/window\.addEventListener\(\s*["']click["']/.test(js),
+    "fireworks must not fire on every tap/click");
+  assert.match(js, /celebrate\(\)/, "fireworks should still fire via celebrate()");
+});
+
 test("festive background animation is defined", () => {
   assert.match(read("styles/main.css"), /@keyframes\s+festive/);
 });

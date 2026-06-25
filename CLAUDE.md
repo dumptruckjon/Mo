@@ -121,8 +121,10 @@ sweets):
   (dumplings, noodles, bubble tea, mooncakes…).
 - A **countdown from 5 → 0**, then a **random** short joke in Simplified Chinese
   (pinyin + English) with **fireworks that also rain sweets/candy**. A different
-  joke shows each time (never the same one twice in a row). Click anywhere for
-  more fireworks; "Again" replays with a fresh joke.
+  joke shows each time (never the same one twice in a row). "Again" replays with
+  a fresh joke. Fireworks fire **only** at the end of the countdown (and on
+  "Again") — never on taps or scrolling — and the canvas sits transparent/idle
+  the rest of the time.
 - A **fortune cookie** 🥠 — tap it to crack open a random sweet love-note.
 - A **grow-a-garden** 🌷 — tap the soil to plant flowers; a counter remembers how
   many flowers have been grown for Mo (saved in `localStorage`).

@@ -16,7 +16,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     initFoodBackground();
     const fireworks = createFireworks(document.getElementById("fireworks"));
-    fireworks.start();
     initCountdown(fireworks);
     initFortuneCookie();
     initGarden();
@@ -204,7 +203,7 @@
   function createFireworks(canvas) {
     const ctx = canvas.getContext("2d");
     const particles = [];
-    let running = false;
+    let rafRunning = false;
     let celebrating = 0;
     const COLORS = ["#ffd24d", "#ff5e3a", "#ff2d55", "#ffffff", "#ff9500", "#ff3b30", "#ffe66d"];
     const CANDY = C.CANDY || ["🍬", "🍭", "🍡"];
@@ -236,13 +235,19 @@
     }
 
     function frame() {
-      if (!running) return;
-
       if (celebrating > 0) {
         celebrating -= 1;
         if (celebrating % 18 === 0) {
           launch(canvas.width * (0.2 + Math.random() * 0.6), canvas.height * (0.2 + Math.random() * 0.4));
         }
+      }
+
+      // Nothing left to show → wipe the canvas clean and idle the loop.
+      // (Keeps the background calm; no flashing while just scrolling around.)
+      if (celebrating <= 0 && particles.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        rafRunning = false;
+        return;
       }
 
       ctx.fillStyle = "rgba(0, 0, 0, 0.18)";
@@ -275,21 +280,21 @@
       requestAnimationFrame(frame);
     }
 
-    window.addEventListener("click", (e) => {
-      if (running) launch(e.clientX, e.clientY);
-    });
+    function ensureRunning() {
+      if (rafRunning) return;
+      rafRunning = true;
+      requestAnimationFrame(frame);
+    }
 
     return {
-      start() {
-        if (running) return;
-        running = true;
-        requestAnimationFrame(frame);
-      },
+      // Fireworks fire ONLY here — when the countdown reaches zero (or "Again").
+      // Not on taps, clicks, or scrolling.
       celebrate() {
-        celebrating = 300;
+        celebrating = 300; // ~5 seconds of auto-fireworks
         launch(canvas.width * 0.3, canvas.height * 0.35);
         launch(canvas.width * 0.7, canvas.height * 0.3);
         launch(canvas.width * 0.5, canvas.height * 0.45);
+        ensureRunning();
       },
     };
   }

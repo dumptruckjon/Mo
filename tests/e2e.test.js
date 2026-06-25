@@ -70,6 +70,32 @@ test("music toggle flips on and off", async () => {
   assert.equal(await page.getAttribute("#music-toggle", "aria-pressed"), "false");
 });
 
+test("fireworks fire only after the countdown — not on tap or scroll", async () => {
+  // Fresh countdown so this test doesn't depend on earlier test timing.
+  await page.reload({ waitUntil: "load" });
+
+  // Returns true if the fireworks canvas has no drawn pixels.
+  const canvasBlank = () => {
+    const c = document.getElementById("fireworks");
+    const data = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+    for (let i = 3; i < data.length; i += 4) if (data[i] !== 0) return false;
+    return true;
+  };
+
+  // During the countdown, tapping and scrolling must NOT spawn fireworks.
+  await page.mouse.click(5, 300);
+  await page.mouse.wheel(0, 200);
+  await page.waitForTimeout(300);
+  assert.ok(await page.evaluate(canvasBlank),
+    "canvas should stay blank during the countdown (no tap/scroll fireworks)");
+
+  // After the countdown reaches zero, fireworks should appear.
+  await page.waitForSelector("#joke:not([hidden])", { timeout: 9000 });
+  await page.waitForTimeout(300);
+  assert.ok(!(await page.evaluate(canvasBlank)),
+    "fireworks should be drawn after the countdown");
+});
+
 test("no uncaught page errors occurred during interaction", () => {
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join("; ")}`);
 });
