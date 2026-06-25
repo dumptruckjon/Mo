@@ -195,6 +195,7 @@
     const pairs = C.MEMORY.length;
     let first = null;      // the first flipped card awaiting a match
     let lock = false;      // ignore taps during the flip-back delay
+    let flipBackTimer = null;
     let matched = 0;
     let moves = 0;
 
@@ -208,6 +209,7 @@
     }
 
     function newGame() {
+      clearTimeout(flipBackTimer); // cancel any pending flip-back from the old board
       first = null;
       lock = false;
       matched = 0;
@@ -257,7 +259,7 @@
         lock = true;
         const a = first;
         first = null;
-        setTimeout(() => {
+        flipBackTimer = setTimeout(() => {
           a.classList.remove("flipped");
           a.textContent = "";
           card.classList.remove("flipped");
@@ -360,8 +362,11 @@
 
     return {
       // Fireworks fire ONLY here — when the countdown reaches zero (or "Again").
-      // Not on taps, clicks, or scrolling.
+      // Not on taps, clicks, or scrolling. Skipped for reduced-motion users.
       celebrate() {
+        if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          return;
+        }
         celebrating = 300; // ~5 seconds of auto-fireworks
         launch(canvas.width * 0.3, canvas.height * 0.35);
         launch(canvas.width * 0.7, canvas.height * 0.3);

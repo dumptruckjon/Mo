@@ -5,11 +5,10 @@ const { test, before, after } = require("node:test");
 const assert = require("node:assert");
 const { startServer, launchBrowser } = require("./helpers");
 
-let server, browser, page;
+let server, browser, page, baseURL;
 const pageErrors = [];
 
 before(async () => {
-  let baseURL;
   ({ server, baseURL } = await startServer());
   browser = await launchBrowser();
   page = await browser.newPage();
@@ -171,6 +170,25 @@ test("PWA: the site still loads offline (served from cache)", async () => {
     assert.equal(await page.locator("#memory-grid .card-tile").count(), 12);
   } finally {
     await ctx.setOffline(false);
+  }
+});
+
+test("respects prefers-reduced-motion: no fireworks", async () => {
+  const ctx = await browser.newContext({ reducedMotion: "reduce" });
+  try {
+    const rm = await ctx.newPage();
+    await rm.goto(baseURL, { waitUntil: "load" });
+    await rm.waitForSelector("#joke:not([hidden])", { timeout: 9000 });
+    await rm.waitForTimeout(400);
+    const blank = await rm.evaluate(() => {
+      const c = document.getElementById("fireworks");
+      const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data;
+      for (let i = 3; i < d.length; i += 4) if (d[i] !== 0) return false;
+      return true;
+    });
+    assert.ok(blank, "fireworks canvas should stay blank under reduced-motion");
+  } finally {
+    await ctx.close();
   }
 });
 

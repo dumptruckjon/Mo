@@ -260,14 +260,14 @@ body {
 
 .memory-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr)); /* minmax(0,..) lets tiles shrink on narrow screens */
   gap: 0.6rem;
   max-width: 360px;
   margin: 0 auto 1rem;
 }
 .card-tile {
   aspect-ratio: 1 / 1;
-  min-height: 64px; /* fallback so tiles are visible even without aspect-ratio */
+  min-height: 44px; /* visible fallback + tap target; small enough not to force overflow */
   border: 2px solid var(--gold);
   border-radius: 12px;
   background: linear-gradient(145deg, #b3001f, #7c0016);

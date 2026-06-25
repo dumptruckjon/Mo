@@ -51,6 +51,20 @@ test("no horizontal overflow at iPhone width", async () => {
   assert.ok(overflow <= 1, `page overflows horizontally by ${overflow}px`);
 });
 
+test("no horizontal overflow at a narrow 320px screen (iPhone SE)", async () => {
+  const small = await context.newPage();
+  try {
+    await small.setViewportSize({ width: 320, height: 568 });
+    await small.goto(page.url(), { waitUntil: "load" });
+    const overflow = await small.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth
+    );
+    assert.ok(overflow <= 1, `page overflows by ${overflow}px at 320px wide`);
+  } finally {
+    await small.close();
+  }
+});
+
 test("the viewport meta opts into safe areas", async () => {
   const content = await page.getAttribute('meta[name="viewport"]', "content");
   assert.match(content, /width=device-width/);
