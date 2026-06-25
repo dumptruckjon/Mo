@@ -2,9 +2,10 @@
 
 Guidance for AI assistants (and humans) working in this repository.
 
-> **Status:** 🚧 Starter scaffold. The repo is brand new and mostly empty.
-> Sections marked **TODO** should be filled in as the project takes shape.
-> Keep this file updated whenever structure, workflows, or conventions change.
+> **Status:** 🌱 Early days. A working starter site is in place (plain
+> HTML/CSS/JS). Sections marked **TODO** should be filled in as the project
+> grows. Keep this file updated whenever structure, workflows, or conventions
+> change.
 
 ## Project Overview
 
@@ -20,18 +21,22 @@ sophistication: keep it playful, simple, and easy to ship.
 
 ## Repository Structure
 
-The project is just getting started. Expected layout (update as it grows):
+A plain static site — no framework, no build step. Current layout:
 
 ```
 .
-├── index.html        # TODO — site entry point
-├── css/ or styles/   # TODO — stylesheets
-├── js/ or scripts/   # TODO — client-side JavaScript
-├── assets/           # TODO — images, fonts, audio, etc.
-└── CLAUDE.md         # This file
+├── index.html                  # Site entry point (markup + content)
+├── styles/
+│   └── main.css                # All styling (CSS custom properties, no preprocessor)
+├── scripts/
+│   └── main.js                 # Vanilla JS: compliment generator + appreciation counter
+├── assets/                     # TODO — images, fonts, audio, etc. (none yet)
+├── .github/workflows/
+│   └── deploy.yml              # GitHub Actions → GitHub Pages deploy
+└── CLAUDE.md                   # This file
 ```
 
-TODO: Replace the above with the real structure once files exist.
+Update this tree whenever files are added or moved.
 
 ## Development Workflow
 
@@ -56,13 +61,21 @@ npx serve .
 ```
 
 ### Deploying (GitHub Pages)
-TODO once Pages is configured. Typical setup:
-1. Repo **Settings → Pages**.
-2. Source: deploy from the default branch (e.g. `main`) at `/ (root)`.
-3. Pushes to that branch publish automatically within a minute or two.
+Deployment is automated via `.github/workflows/deploy.yml`. Every push to
+`main` uploads the repo root as a Pages artifact and publishes it.
 
-> If a build step or framework is added later (e.g. a static-site generator
-> or a GitHub Actions deploy workflow), document the exact commands here.
+**One-time setup** (must be done in the GitHub UI before the first deploy):
+1. Repo **Settings → Pages**.
+2. Under **Build and deployment → Source**, select **GitHub Actions**.
+3. Push to `main` (or run the workflow manually via **Actions →
+   Deploy to GitHub Pages → Run workflow**).
+
+The live URL appears in the workflow's deploy step output and under
+Settings → Pages — expected to be `https://dumptruckjon.github.io/mo/`.
+
+> There is no build step: the site is served exactly as the files appear in
+> the repo. If a static-site generator is added later, update the workflow's
+> artifact `path` and document the build command here.
 
 ## Conventions
 

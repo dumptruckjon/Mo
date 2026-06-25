@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Website for Mo 💖</title>
+  <meta name="description" content="A small, silly website made with love for Mo." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="styles/main.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💖</text></svg>" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <div class="hero__emoji" aria-hidden="true">💖</div>
+      <h1 class="hero__title">Hi&nbsp;Mo!</h1>
+      <p class="hero__subtitle">
+        This entire corner of the internet exists for exactly one person.
+        <br />
+        (Spoiler: it's you.)
+      </p>
+    </header>
+
+    <section class="card" aria-labelledby="compliment-heading">
+      <h2 id="compliment-heading">Your Daily Dose of Flattery</h2>
+      <p class="compliment" id="compliment">Press the button. Trust the process.</p>
+      <button class="btn" id="compliment-btn" type="button">
+        Compliment me 👉
+      </button>
+    </section>
+
+    <section class="card" aria-labelledby="counter-heading">
+      <h2 id="counter-heading">Official Mo Appreciation Counter</h2>
+      <p class="counter">
+        You have been appreciated
+        <strong id="counter" aria-live="polite">0</strong>
+        times since opening this page.
+      </p>
+      <button class="btn btn--secondary" id="counter-btn" type="button">
+        Appreciate Mo +1
+      </button>
+    </section>
+
+    <footer class="footer">
+      <p>Made with 💖, questionable jokes, and zero dependencies.</p>
+      <!-- TODO (Jon): personalize this — inside jokes, a real photo, your anniversary date, etc. -->
+    </footer>
+  </main>
+
+  <script src="scripts/main.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,137 @@
+/* Mo's website — plain CSS, no build step, no dependencies. */
+
+:root {
+  --bg: #fff0f6;
+  --bg-accent: #ffe0ec;
+  --card: #ffffff;
+  --ink: #3a2a35;
+  --pink: #ff5c8a;
+  --pink-dark: #e0436f;
+  --purple: #9b6dff;
+  --shadow: 0 10px 30px rgba(224, 67, 111, 0.18);
+  --radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  color: var(--ink);
+  background: radial-gradient(circle at top, var(--bg-accent), var(--bg));
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem 4rem;
+}
+
+.page {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ---------- Hero ---------- */
+.hero {
+  text-align: center;
+  padding: 1rem 0 0.5rem;
+}
+
+.hero__emoji {
+  font-size: 4rem;
+  animation: bob 2.5s ease-in-out infinite;
+}
+
+.hero__title {
+  font-size: clamp(2.5rem, 10vw, 4rem);
+  margin: 0.25rem 0;
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero__subtitle {
+  font-size: 1.1rem;
+  color: var(--pink-dark);
+  margin: 0;
+}
+
+/* ---------- Cards ---------- */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+  color: var(--pink-dark);
+}
+
+.compliment {
+  font-size: 1.3rem;
+  min-height: 3rem;
+  margin: 1rem 0;
+  font-weight: 600;
+}
+
+.counter strong {
+  font-size: 1.6rem;
+  color: var(--pink);
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(90deg, var(--pink), var(--pink-dark));
+  box-shadow: 0 6px 16px rgba(224, 67, 111, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(224, 67, 111, 0.45);
+}
+
+.btn:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.btn--secondary {
+  background: linear-gradient(90deg, var(--purple), #7a4dff);
+  box-shadow: 0 6px 16px rgba(123, 77, 255, 0.35);
+}
+
+/* ---------- Footer ---------- */
+.footer {
+  text-align: center;
+  color: var(--pink-dark);
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* ---------- Motion ---------- */
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__emoji { animation: none; }
+  .btn { transition: none; }
+}
