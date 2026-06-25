@@ -1,12 +1,68 @@
 // Mo's festive countdown — vanilla JS, no dependencies, no build step.
 
+// A pool of short jokes in Simplified Chinese (with pinyin + English).
+// A random one is shown each time the countdown reaches zero.
+// TODO (Jon): add your own inside jokes here anytime — keep zh/punch/pinyin/en.
+const JOKES = [
+  {
+    zh: "什么东西越洗越脏？",
+    punch: "——水！💦",
+    pinyin: "Shénme dōngxi yuè xǐ yuè zāng? Shuǐ!",
+    en: '"What gets dirtier the more you wash it? Water!" 😆',
+  },
+  {
+    zh: "谁是百兽之王？",
+    punch: "——动物园园长！🦁",
+    pinyin: "Shéi shì bǎishòu zhī wáng? Dòngwùyuán yuánzhǎng!",
+    en: '"Who is the king of all the beasts? The zoo director!"',
+  },
+  {
+    zh: "什么东西天气越热，它爬得越高？",
+    punch: "——温度计！🌡️",
+    pinyin: "Shénme dōngxi tiānqì yuè rè, tā pá de yuè gāo? Wēndùjì!",
+    en: '"What climbs higher the hotter it gets? A thermometer!"',
+  },
+  {
+    zh: "什么布剪不断？",
+    punch: "——瀑布！🌊",
+    pinyin: "Shénme bù jiǎn bù duàn? Pùbù!",
+    en: '"What cloth (bù) can\'t be cut? A waterfall (pùbù)!"',
+  },
+  {
+    zh: "什么车寸步难行？",
+    punch: "——风车！🎡",
+    pinyin: "Shénme chē cùnbù nánxíng? Fēngchē!",
+    en: '"What vehicle can\'t move an inch? A pinwheel (fēngchē)!"',
+  },
+  {
+    zh: "为什么北极熊不吃企鹅？",
+    punch: "——因为它们够不着！🐻‍❄️🐧",
+    pinyin: "Wèishéme běijíxióng bù chī qǐ'é? Yīnwèi tāmen gòu bù zháo!",
+    en: '"Why don\'t polar bears eat penguins? They can\'t reach them!"',
+  },
+];
+
+function pickJoke(currentIndex) {
+  if (JOKES.length <= 1) return 0;
+  let next = currentIndex;
+  while (next === currentIndex) {
+    next = Math.floor(Math.random() * JOKES.length);
+  }
+  return next;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const countdownEl = document.getElementById("countdown");
   const jokeEl = document.getElementById("joke");
   const restartBtn = document.getElementById("restart");
+  const jokeZh = document.getElementById("joke-zh");
+  const jokePunch = document.getElementById("joke-punch");
+  const jokePinyin = document.getElementById("joke-pinyin");
+  const jokeEn = document.getElementById("joke-en");
 
-  const START = 10;
+  const START = 5;
   let timerId = null;
+  let lastJoke = -1;
 
   // ---------- Countdown ----------
   function startCountdown() {
@@ -21,12 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
       n -= 1;
       if (n > 0) {
         countdownEl.textContent = n;
-        // restart the pop animation each tick
-        countdownEl.classList.remove("tick");
-        void countdownEl.offsetWidth; // force reflow
-        countdownEl.classList.add("tick");
-        void countdownEl.offsetWidth;
-        countdownEl.classList.remove("tick");
       } else {
         clearInterval(timerId);
         reachZero();
@@ -35,6 +85,14 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function reachZero() {
+    // Pick and show a fresh random joke.
+    lastJoke = pickJoke(lastJoke);
+    const joke = JOKES[lastJoke];
+    jokeZh.textContent = joke.zh;
+    jokePunch.textContent = joke.punch;
+    jokePinyin.textContent = joke.pinyin;
+    jokeEn.textContent = joke.en;
+
     countdownEl.hidden = true;
     jokeEl.hidden = false;
     restartBtn.hidden = false;
@@ -43,13 +101,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   restartBtn.addEventListener("click", startCountdown);
 
-  // ---------- Fireworks (canvas particle system) ----------
+  // ---------- Fireworks ----------
   const fireworks = createFireworks(document.getElementById("fireworks"));
   fireworks.start();
 
   startCountdown();
 });
 
+// ---------- Fireworks (canvas particle system) ----------
 function createFireworks(canvas) {
   const ctx = canvas.getContext("2d");
   const particles = [];
@@ -137,7 +196,6 @@ function createFireworks(canvas) {
     },
     celebrate() {
       celebrating = 300; // ~5 seconds of auto-fireworks
-      // Immediate opening volley.
       launch(canvas.width * 0.3, canvas.height * 0.35);
       launch(canvas.width * 0.7, canvas.height * 0.3);
       launch(canvas.width * 0.5, canvas.height * 0.45);

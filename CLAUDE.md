@@ -77,12 +77,14 @@ Update this tree whenever files are added or moved.
 ## Current Site Behavior
 
 - A festive, animated red/gold Chinese-New-Year-style background.
-- A countdown ticks from **10 → 0**.
-- At **0**, a short joke in **Simplified Chinese** is revealed (with pinyin and
-  an English translation) and **canvas fireworks** launch.
+- A countdown ticks from **5 → 0**.
+- At **0**, a **random** short joke in **Simplified Chinese** is revealed (with
+  pinyin and an English translation) and **canvas fireworks** launch. A
+  different joke is shown each time (never the same one twice in a row).
 - Clicking anywhere sets off extra fireworks; an "Again" button replays the
-  countdown.
-- The joke text lives in `index.html`; swap it there for a personal one.
+  countdown with a fresh random joke.
+- The jokes live in the `JOKES` array in `scripts/main.js` (currently 6); add
+  your own there. JS fills the `#joke-*` placeholders in `index.html`.
 
 ## Development Workflow
 

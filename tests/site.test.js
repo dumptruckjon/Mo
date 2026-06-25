@@ -30,16 +30,37 @@ test("index.html contains the required UI hooks", () => {
   }
 });
 
-test("the Mandarin joke and its punchline are present", () => {
+test("the joke container has placeholders for JS to fill", () => {
   const html = read("index.html");
-  assert.ok(html.includes("什么东西越洗越脏"), "joke setup (zh) missing");
-  assert.ok(html.includes("水"), "joke punchline (zh) missing");
+  for (const id of ['id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"']) {
+    assert.ok(html.includes(id), `missing joke placeholder ${id}`);
+  }
 });
 
-test("countdown starts at 10 and reveals the joke at zero", () => {
+test("countdown starts at 5 and reveals a joke at zero", () => {
   const js = read("scripts/main.js");
-  assert.match(js, /START\s*=\s*10/, "countdown should start at 10");
+  assert.match(js, /START\s*=\s*5\b/, "countdown should start at 5");
   assert.match(js, /reachZero/, "missing reachZero handler");
+});
+
+test("there are at least 5 jokes, each fully formed", () => {
+  const js = read("scripts/main.js");
+  // Count joke objects by their required keys.
+  const zhCount = (js.match(/\bzh:/g) || []).length;
+  const punchCount = (js.match(/\bpunch:/g) || []).length;
+  const pinyinCount = (js.match(/\bpinyin:/g) || []).length;
+  const enCount = (js.match(/\ben:/g) || []).length;
+  assert.ok(zhCount >= 5, `expected >= 5 jokes, found ${zhCount}`);
+  // Every joke should have all four fields, so the counts must match.
+  assert.equal(punchCount, zhCount, "every joke needs a punch line");
+  assert.equal(pinyinCount, zhCount, "every joke needs pinyin");
+  assert.equal(enCount, zhCount, "every joke needs an English translation");
+});
+
+test("a random joke is selected each time", () => {
+  const js = read("scripts/main.js");
+  assert.match(js, /Math\.random\(\)/, "joke selection should be randomized");
+  assert.match(js, /pickJoke/, "missing pickJoke selector");
 });
 
 test("fireworks engine is wired up", () => {

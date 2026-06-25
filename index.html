@@ -21,14 +21,14 @@
 
     <section class="stage" aria-live="polite">
       <!-- The big countdown number. -->
-      <div class="countdown" id="countdown">10</div>
+      <div class="countdown" id="countdown">5</div>
 
-      <!-- Revealed when the countdown hits zero. -->
+      <!-- Revealed when the countdown hits zero. A random joke is filled in by JS. -->
       <div class="joke" id="joke" hidden>
-        <p class="joke__zh" lang="zh-Hans">什么东西越洗越脏？</p>
-        <p class="joke__punch" lang="zh-Hans">——水！💦</p>
-        <p class="joke__pinyin">Shénme dōngxi yuè xǐ yuè zāng? Shuǐ!</p>
-        <p class="joke__en">"What gets dirtier the more you wash it? Water!" 😆</p>
+        <p class="joke__zh" id="joke-zh" lang="zh-Hans"></p>
+        <p class="joke__punch" id="joke-punch" lang="zh-Hans"></p>
+        <p class="joke__pinyin" id="joke-pinyin"></p>
+        <p class="joke__en" id="joke-en"></p>
       </div>
     </section>
 
