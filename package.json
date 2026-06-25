@@ -1,0 +1,9 @@
+{
+  "name": "mo-site",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A funny GitHub Pages site for Mo.",
+  "scripts": {
+    "test": "node --test"
+  }
+}
