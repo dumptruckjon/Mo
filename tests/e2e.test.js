@@ -114,6 +114,27 @@ test("memory game: solving the whole board wins", async () => {
   assert.match(status, /did it/i, `expected a win message, got "${status}"`);
 });
 
+test("scratch-off card reveals its prize when scratched", async () => {
+  const before = (await page.textContent("#scratch-text")).trim();
+  assert.ok(before.length > 0 && before !== "…", "a hidden prize should be set");
+  await page.locator("#scratch-canvas").scrollIntoViewIfNeeded();
+  const box = await page.locator("#scratch-canvas").boundingBox();
+  const left = box.x + 6;
+  const right = box.x + box.width - 6;
+  const lines = 8;
+  for (let i = 0; i < lines; i++) {
+    const y = box.y + 8 + ((box.height - 16) * i) / (lines - 1);
+    await page.mouse.move(left, y);
+    await page.mouse.down();
+    for (let s = 1; s <= 24; s++) {
+      await page.mouse.move(left + ((right - left) * s) / 24, y);
+    }
+    await page.mouse.up();
+  }
+  await page.waitForSelector("#scratch.revealed", { timeout: 4000 });
+  assert.ok(await page.locator("#scratch.revealed").count(), "card should be revealed after scratching");
+});
+
 test("fireworks fire only after the countdown — not on tap or scroll", async () => {
   // Fresh countdown so this test doesn't depend on earlier test timing.
   await page.reload({ waitUntil: "load" });

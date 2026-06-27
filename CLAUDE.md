@@ -109,21 +109,24 @@ tooling.
 
 ```
 .
-├── index.html                  # Site entry point (markup + the festival sections)
+├── index.html                  # Front-door QUIZ (gate). Pass 3/3 to unlock the festival.
+├── festival.html               # The festival itself (countdown, cookie, garden, envelopes, memory, scratch, daily note)
 ├── manifest.webmanifest        # PWA manifest (installable, standalone, icons)
-├── sw.js                       # Service worker (network-first; offline support)
+├── sw.js                       # Service worker (network-first; offline; precaches both pages)
 ├── assets/                     # PWA icons (192/512/maskable/apple-touch)
 ├── styles/
-│   └── main.css                # All styling: festival bg, countdown, joke, cookie, garden, food, daily
+│   └── main.css                # All styling for both pages (quiz, festival, scratch, etc.)
 ├── scripts/
-│   ├── content.js              # ALL editable content (jokes, fortunes, coupons, daily notes, etc). Edit here.
-│   └── main.js                 # Vanilla JS behavior: daily note, countdown, fireworks+candy, cookie,
-│                               #   garden, envelopes, memory, SW registration. Reads window.MoContent.
+│   ├── content.js              # ALL editable content (jokes, fortunes, coupons, daily notes, QUIZ, SCRATCH…). Edit here.
+│   ├── quiz.js                 # Quiz front-door logic (random 3-of-pool, restart, confetti). Reads window.MoContent.
+│   └── main.js                 # Festival behavior: daily note, countdown, fireworks+candy, cookie,
+│                               #   garden, envelopes, memory, scratch-off, SW registration. Reads window.MoContent.
 ├── tests/
 │   ├── site.test.js            # node:test unit/structure/logic tests (no browser)
-│   ├── e2e.test.js             # Playwright browser tests — actually click every feature
-│   ├── mobile.test.js          # Playwright iPhone-emulated tests — touch + responsive layout
-│   └── helpers.js              # shared: locate Chromium + serve the site locally
+│   ├── e2e.test.js             # Playwright tests for the FESTIVAL (festival.html) — clicks every feature
+│   ├── quiz.test.js            # Playwright tests for the QUIZ (index.html) — pass/fail/restart/prize
+│   ├── mobile.test.js          # Playwright iPhone tests (real WebKit in CI) — touch + responsive layout
+│   └── helpers.js              # shared: locate a browser + serve the site (or MO_BASE_URL for live)
 ├── package.json                # `npm test` → `node --test` (runs unit + e2e)
 ├── package-lock.json           # committed for reproducible `npm ci` in CI
 ├── .gitignore                  # ignores node_modules etc.
@@ -140,8 +143,13 @@ Update this tree whenever files are added or moved.
 
 ## Current Site Behavior
 
-A little festival built around the things Mo loves (Chinese food, gardening,
-sweets):
+**Front door — a quiz gate (`index.html`).** Visitors first hit a 3-question
+quiz (3 picked at random from a pool in `content.js`). A wrong answer shows a
+cheeky message and restarts at question 1; a perfect 3/3 fires **confetti**, a
+"100% 🏆" badge, and reveals the **"Enter the festival"** link to `festival.html`.
+
+**The prize — a little festival (`festival.html`)** built around the things Mo
+loves (Chinese food, gardening, sweets):
 
 - A festive red/gold background (a **static** gradient — intentionally not
   animated, to avoid the iOS Safari full-page repaint/flash on scroll) with
@@ -159,13 +167,16 @@ sweets):
   coupon" (a dumpling dinner, boba run, dessert-first night…).
 - **Sweet memory match** 🀄 — a find-the-pairs game with Chinese food/sweet
   tiles; completing it shows a win message and sets off the fireworks.
+- **Scratch-off card** ✨ — drag across the gold foil (canvas) to reveal a hidden
+  surprise; "New card" picks another. Pure touch/pointer interaction.
 - **Daily love note** 💌 — a different note each day (date-seeded: same all day,
   changes daily; no backend).
 - **Installable PWA** — `manifest.webmanifest` + `sw.js` make it add-to-home-screen
   installable with a custom 🏮 icon/splash, and it **works offline** (the service
   worker is network-first: fresh when online, cached when offline).
 - All wording lives in `scripts/content.js` for easy personalization (jokes,
-  fortunes, coupons, flowers, foods, memory tiles, daily notes).
+  fortunes, coupons, flowers, foods, memory tiles, daily notes, quiz pool,
+  wrong-answer reactions, scratch prizes).
 - (Removed: the background music toggle.)
 
 ## Development Workflow

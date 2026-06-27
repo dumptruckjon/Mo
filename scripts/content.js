@@ -107,9 +107,10 @@
       "I'd cross any room just to get to you.",
     ],
 
-    // Front-door quiz. Pass all 3 (any wrong answer restarts) to unlock the
-    // festival. `answer` must exactly match one of `options`. Options are
-    // shuffled at render time. TODO (Jon): edit freely.
+    // Front-door quiz POOL. Each visit shows 3 random questions; any wrong
+    // answer restarts. `answer` must exactly match one of `options` (options are
+    // shuffled at render time). TODO (Jon): add your own inside jokes here — the
+    // first three are yours; the rest are cute filler you can replace.
     QUIZ: [
       {
         q: "Who is the naughtiest?",
@@ -126,6 +127,49 @@
         answer: "LooAyi gushi",
         options: ["LooAyi gushi", "Huali gushi", "Josh gushi", "Baba gushi"],
       },
+      {
+        q: "Who deserves dessert first, always?",
+        answer: "Mo",
+        options: ["Mo", "Jon", "Josh", "The dog 🐶"],
+      },
+      {
+        q: "Best way to spend a Saturday?",
+        answer: "Together 💕",
+        options: ["Together 💕", "Doing chores", "Working", "Taxes 🧾"],
+      },
+      {
+        q: "What's the superior food group?",
+        answer: "Dumplings 🥟",
+        options: ["Dumplings 🥟", "Salad", "Plain rice", "Air"],
+      },
+      {
+        q: "How much does Jon love Mo?",
+        answer: "To the moon and back 🌙",
+        options: ["To the moon and back 🌙", "A little", "Meh", "It's complicated"],
+      },
+    ],
+
+    // Playful messages shown when she gets one wrong (the quiz restarts).
+    WRONG_REACTIONS: [
+      "Nope! Back to the start, cutie 💕",
+      "Ha! Not quite — try again 😜",
+      "Wrong! But I still love you. Restart 💖",
+      "Close… but no dumpling 🥟 From the top!",
+      "Eep! That one resets us. Again! 🔁",
+      "Nice try, troublemaker 😏 Start over!",
+      "Incorrect — but adorable. Back to Q1 💋",
+    ],
+
+    // Hidden prizes revealed by scratching the scratch-off card.
+    SCRATCH: [
+      "💖 You're my favorite person. Always.",
+      "🥠 Lucky you — a kiss is owed. Redeem now.",
+      "🍰 Surprise: dessert is on me tonight.",
+      "🌷 You make everything bloom.",
+      "🧧 A little luck and a lot of love, just for you.",
+      "😘 Scratch complete: one free smooch.",
+      "🍜 You + me + noodles = the perfect night.",
+      "✨ The real prize is you. (Cheesy, but true.)",
     ],
   };
 

@@ -86,6 +86,17 @@
       <button class="btn btn--small" id="memory-new" type="button">New game 🔄</button>
     </section>
 
+    <!-- Scratch-off card: drag to reveal a hidden surprise. -->
+    <section class="card scratch" id="scratch" aria-labelledby="scratch-h">
+      <h2 id="scratch-h">Scratch for a surprise ✨</h2>
+      <p class="scratch__hint">Drag across the gold to reveal it.</p>
+      <div class="scratch__stage">
+        <p class="scratch__prize" id="scratch-text">…</p>
+        <canvas class="scratch__foil" id="scratch-canvas" aria-label="Scratch-off card"></canvas>
+      </div>
+      <button class="btn btn--small" id="scratch-new" type="button">New card 🎟️</button>
+    </section>
+
     <footer class="footer">
       <p>恭喜发财 · Made with 💖 for Mo</p>
     </footer>

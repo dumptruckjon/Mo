@@ -24,6 +24,7 @@
       initGarden,
       initEnvelopes,
       () => initMemory(fireworks),
+      initScratch,
     ];
     for (const init of features) {
       try { init(); } catch (e) { console.error("Mo: a feature failed to start:", e); }
@@ -271,6 +272,107 @@
 
     if (newBtn) newBtn.addEventListener("click", newGame);
     newGame();
+  }
+
+  // ---------- Scratch-off card ----------
+  function initScratch() {
+    const wrap = document.getElementById("scratch");
+    const canvas = document.getElementById("scratch-canvas");
+    const textEl = document.getElementById("scratch-text");
+    const newBtn = document.getElementById("scratch-new");
+    const ctx = canvas && canvas.getContext && canvas.getContext("2d");
+    if (!wrap || !canvas || !textEl || !ctx || !C.SCRATCH) return;
+
+    let scratching = false;
+    let revealed = false;
+    let lastPrize = -1;
+
+    function sizeCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.max(1, Math.round(rect.width));
+      canvas.height = Math.max(1, Math.round(rect.height));
+    }
+
+    function drawFoil() {
+      sizeCanvas();
+      const g = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      g.addColorStop(0, "#f5c542");
+      g.addColorStop(0.5, "#e0a92e");
+      g.addColorStop(1, "#f5c542");
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "rgba(120, 70, 0, 0.8)";
+      ctx.font = "bold 18px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("Scratch here! 🪙", canvas.width / 2, canvas.height / 2);
+    }
+
+    function newCard() {
+      revealed = false;
+      wrap.classList.remove("revealed");
+      lastPrize = pickIndex(C.SCRATCH.length, lastPrize);
+      textEl.textContent = C.SCRATCH[lastPrize];
+      canvas.style.display = "";
+      drawFoil();
+    }
+
+    function pointPos(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      return { x, y };
+    }
+
+    function eraseAt(x, y) {
+      ctx.globalCompositeOperation = "destination-out";
+      ctx.beginPath();
+      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function scratchedFraction() {
+      const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let clear = 0;
+      // sample every 4th pixel for speed
+      for (let i = 3; i < data.length; i += 16) {
+        if (data[i] === 0) clear++;
+      }
+      return clear / (data.length / 16);
+    }
+
+    function maybeReveal() {
+      if (revealed) return;
+      if (scratchedFraction() > 0.5) {
+        revealed = true;
+        wrap.classList.add("revealed");
+        canvas.style.display = "none";
+      }
+    }
+
+    function onDown(e) { scratching = true; const p = pointPos(e); eraseAt(p.x, p.y); e.preventDefault(); }
+    function onMove(e) {
+      if (!scratching) return;
+      const p = pointPos(e);
+      eraseAt(p.x, p.y);
+      e.preventDefault();
+    }
+    function onUp() { if (!scratching) return; scratching = false; maybeReveal(); }
+
+    canvas.addEventListener("pointerdown", onDown);
+    canvas.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    // Fallbacks for browsers without Pointer Events.
+    canvas.addEventListener("mousedown", onDown);
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("touchstart", onDown, { passive: false });
+    canvas.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
+    window.addEventListener("resize", () => { if (!revealed) drawFoil(); });
+
+    if (newBtn) newBtn.addEventListener("click", newCard);
+    newCard();
   }
 
   // ---------- Fireworks + candy (canvas particle system) ----------

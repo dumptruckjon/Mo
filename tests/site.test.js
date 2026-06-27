@@ -67,21 +67,34 @@ test("the festival page has all required UI hooks", () => {
     'id="garden"', 'id="flower-count"',
     'id="envelopes"', 'id="envelope-text"',
     'id="memory-grid"', 'id="memory-status"', 'id="memory-new"',
+    'id="scratch"', 'id="scratch-canvas"', 'id="scratch-text"', 'id="scratch-new"',
     'id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"',
   ];
   for (const id of ids) assert.ok(html.includes(id), `missing element ${id}`);
 });
 
-test("the quiz has 3 questions with the expected correct answers", () => {
-  assert.ok(Array.isArray(content.QUIZ) && content.QUIZ.length === 3, "expected 3 quiz questions");
+test("the quiz pool is well-formed and includes the signature questions", () => {
+  assert.ok(Array.isArray(content.QUIZ) && content.QUIZ.length >= 3,
+    "quiz pool needs at least 3 questions");
   for (const item of content.QUIZ) {
     assert.ok(item.q && item.q.length > 0, "question text missing");
     assert.ok(Array.isArray(item.options) && item.options.length >= 3, "need >= 3 options");
     assert.ok(item.options.includes(item.answer), "the correct answer must be one of the options");
   }
-  assert.equal(content.QUIZ[0].answer, "Mo");
-  assert.equal(content.QUIZ[1].answer, "Pickin' and fartin'");
-  assert.equal(content.QUIZ[2].answer, "LooAyi gushi");
+  // The three inside-joke questions must be present in the pool.
+  const byQ = Object.fromEntries(content.QUIZ.map((i) => [i.q, i.answer]));
+  assert.equal(byQ["Who is the naughtiest?"], "Mo");
+  assert.equal(byQ["What is Molly's favorite hobby?"], "Pickin' and fartin'");
+  assert.equal(byQ["Which gushis are the most commonly shared gushis?"], "LooAyi gushi");
+});
+
+test("there are wrong-answer reactions and scratch-card prizes", () => {
+  assert.ok(Array.isArray(content.WRONG_REACTIONS) && content.WRONG_REACTIONS.length >= 3,
+    "need a few wrong-answer reactions");
+  for (const r of content.WRONG_REACTIONS) assert.ok(typeof r === "string" && r.length > 0, "empty reaction");
+  assert.ok(Array.isArray(content.SCRATCH) && content.SCRATCH.length >= 4,
+    "need several scratch prizes");
+  for (const s of content.SCRATCH) assert.ok(typeof s === "string" && s.length > 0, "empty scratch prize");
 });
 
 // ---------- Content module ----------
@@ -157,7 +170,7 @@ test("main.js wires up every feature", () => {
   const js = read("scripts/main.js");
   for (const sym of [
     "initFoodBackground", "initCountdown", "initFortuneCookie",
-    "initGarden", "initEnvelopes", "initMemory", "initDailyNote", "createFireworks",
+    "initGarden", "initEnvelopes", "initMemory", "initDailyNote", "initScratch", "createFireworks",
     "reachZero", "mo-flower-count",
   ]) {
     assert.ok(js.includes(sym), `main.js missing ${sym}`);

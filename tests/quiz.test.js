@@ -67,17 +67,18 @@ test("a wrong answer restarts the quiz at question 1", async () => {
   assert.ok(await page.locator("#quiz-prize").isHidden(), "prize must stay locked");
 });
 
-test("answering all 3 correctly reveals the festival link", async () => {
+test("answering all 3 correctly reveals the festival link + perfect badge", async () => {
   await page.reload({ waitUntil: "load" });
-  for (let i = 0; i < QUIZ.length; i++) {
+  for (let n = 0; n < 3; n++) {
     const q = (await page.textContent("#quiz-question")).trim();
     const item = QUIZ.find((it) => it.q === q);
     await answer(item.answer);
-    if (i < QUIZ.length - 1) await waitForQuestionChange(q);
+    if (n < 2) await waitForQuestionChange(q);
   }
   await page.waitForSelector("#quiz-prize:not([hidden])", { timeout: 4000 });
   const href = await page.getAttribute("#prize-link", "href");
   assert.match(href, /festival\.html/, "prize should link to the festival");
+  assert.match((await page.textContent("#prize-badge")).trim(), /100%/, "perfect-score badge should show");
 });
 
 test("the prize link actually opens the festival", async () => {
