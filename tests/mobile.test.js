@@ -98,6 +98,54 @@ test("primary tap targets meet the 44px minimum", async () => {
     `envelope too small: ${JSON.stringify(envelope)}`);
 });
 
+test("every small button + heart star meets 44px and stays spaced at 320px", async () => {
+  const small = await context.newPage();
+  try {
+    await small.setViewportSize({ width: 320, height: 700 });
+    await small.goto(page.url(), { waitUntil: "load" });
+    await small.waitForFunction(
+      () => document.querySelectorAll("#constellation .star").length === 10,
+      null, { timeout: 4000 }
+    );
+    // 1) Size: every .btn--small and every heart .star is at least 44x44.
+    const tooSmall = await small.evaluate(() => {
+      const out = [];
+      for (const el of document.querySelectorAll(".btn--small, #constellation .star")) {
+        if (el.hidden || el.closest("[hidden]") || el.offsetParent === null) continue; // skip hidden
+        const r = el.getBoundingClientRect();
+        if (r.width === 0 && r.height === 0) continue;
+        if (r.width < 44 || r.height < 44) {
+          out.push((el.id || el.className) + ":" + Math.round(r.width) + "x" + Math.round(r.height));
+        }
+      }
+      return out;
+    });
+    assert.deepEqual(tooSmall, [], `targets under 44px: ${tooSmall.join(", ")}`);
+
+    // 2) Spacing: no two heart-star tap boxes overlap, and adjacent ones keep a
+    //    finger-safe gap (no thin "which star did I hit?" bands).
+    const stars = await small.$$eval("#constellation .star", (els) =>
+      els.map((e) => { const r = e.getBoundingClientRect(); return { x: r.x, y: r.y, r: r.right, b: r.bottom }; })
+    );
+    let overlaps = 0, worstGap = Infinity;
+    for (let i = 0; i < stars.length; i++) {
+      for (let j = i + 1; j < stars.length; j++) {
+        const a = stars[i], c = stars[j];
+        const ox = Math.min(a.r, c.r) - Math.max(a.x, c.x); // box overlap on X
+        const oy = Math.min(a.b, c.b) - Math.max(a.y, c.y); // box overlap on Y
+        if (ox > 1 && oy > 1) { overlaps++; continue; }
+        // projected gap on whichever axis the boxes are separated
+        if (ox > 4) worstGap = Math.min(worstGap, Math.max(a.y, c.y) - Math.min(a.b, c.b));
+        else if (oy > 4) worstGap = Math.min(worstGap, Math.max(a.x, c.x) - Math.min(a.r, c.r));
+      }
+    }
+    assert.equal(overlaps, 0, `${overlaps} pairs of heart stars overlap`);
+    assert.ok(worstGap >= 8, `heart stars too close: tightest gap ${worstGap.toFixed(1)}px (<8)`);
+  } finally {
+    await small.close();
+  }
+});
+
 test("tapping the cookie works with touch", async () => {
   const before = (await page.textContent("#fortune-text")).trim();
   await page.locator("#fortune-cookie").tap({ force: true });

@@ -647,10 +647,14 @@
   // Hand-placed so stars never overlap; order traces a heart outline (close 10→1
   // completes the top dip).
   function heartPoints() {
+    // Hand-placed so the 44px star tap targets never collide. Even in the
+    // narrowest (236px) container on a 320px phone, every neighbouring tap box
+    // keeps ≥10px of clear space (and zero overlap). Paired with the 300px-tall
+    // .constellation box; don't tweak either without re-checking spacing at 320px.
     return [
-      { px: 50, py: 30 }, { px: 68, py: 18 }, { px: 84, py: 32 }, { px: 76, py: 56 },
-      { px: 60, py: 76 }, { px: 50, py: 90 }, { px: 40, py: 76 }, { px: 24, py: 56 },
-      { px: 16, py: 32 }, { px: 32, py: 18 },
+      { px: 50, py: 22 }, { px: 71, py: 8 }, { px: 88, py: 24 }, { px: 80, py: 46 },
+      { px: 64, py: 69 }, { px: 50, py: 87 }, { px: 36, py: 69 }, { px: 20, py: 46 },
+      { px: 12, py: 24 }, { px: 29, py: 8 },
     ];
   }
   function initConstellation() {
