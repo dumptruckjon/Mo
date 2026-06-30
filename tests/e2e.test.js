@@ -237,6 +237,113 @@ test("respects prefers-reduced-motion: no fireworks", async () => {
   }
 });
 
+test("love-letter types itself out", async () => {
+  await page.waitForFunction(
+    () => document.getElementById("love-letter").classList.contains("done"),
+    null, { timeout: 6000 }
+  );
+  assert.ok((await page.textContent("#love-letter")).trim().length > 0);
+});
+
+test("mascot reacts when tapped", async () => {
+  await page.click("#mascot");
+  await page.waitForFunction(
+    () => !document.getElementById("mascot-bubble").hidden, null, { timeout: 3000 }
+  );
+  assert.ok((await page.textContent("#mascot-bubble")).trim().length > 0);
+});
+
+test("releasing a wish lantern shows a wish and floats a lantern", async () => {
+  await page.click("#lantern-release");
+  assert.ok((await page.textContent("#lantern-wish")).trim().length > 0, "a wish should show");
+  assert.ok(await page.locator("#lantern-layer .sky-lantern").count(), "a lantern should appear");
+});
+
+test("spin wheel lands on a result", async () => {
+  await page.click("#wheel-spin");
+  await page.waitForFunction(
+    () => document.getElementById("wheel-result").textContent.includes("→"),
+    null, { timeout: 5000 }
+  );
+});
+
+test("slot machine spins and resolves", async () => {
+  await page.click("#slot-spin");
+  await page.waitForFunction(
+    () => document.getElementById("slot-result").textContent.trim().length > 0,
+    null, { timeout: 5000 }
+  );
+});
+
+test("love-note draw shows a note", async () => {
+  const before = (await page.textContent("#draw-note")).trim();
+  await page.click("#draw-btn");
+  await page.waitForFunction(
+    (b) => {
+      const t = document.getElementById("draw-note").textContent.trim();
+      return t.length > 0 && t !== "Tap for a love note…" && t !== b;
+    }, before, { timeout: 3000 }
+  );
+});
+
+test("whack-a-dumpling: starting and bopping scores a point", async () => {
+  await page.click("#whack-start");
+  let scored = false;
+  for (let i = 0; i < 50 && !scored; i++) {
+    await page.evaluate(() => { const c = document.querySelector(".whack-cell.up"); if (c) c.click(); });
+    scored = await page.evaluate(() => /Score: [1-9]/.test(document.getElementById("whack-status").textContent));
+    if (!scored) await page.waitForTimeout(100);
+  }
+  assert.ok(scored, "should be able to bop a dumpling for a point");
+});
+
+test("fortune teller: color then number reveals a fortune", async () => {
+  await page.locator("#teller-options .teller__opt").first().click(); // color
+  await page.locator("#teller-options .teller__opt").first().click(); // number
+  await page.waitForFunction(
+    () => document.getElementById("teller-result").textContent.trim().length > 0,
+    null, { timeout: 3000 }
+  );
+  assert.ok(await page.locator("#teller-reset:not([hidden])").count());
+});
+
+test("constellation: connecting the stars in order completes the heart", async () => {
+  const stars = page.locator("#constellation .star");
+  const n = await stars.count();
+  assert.equal(n, 10, "should render 10 stars");
+  for (let i = 0; i < n; i++) await stars.nth(i).click();
+  await page.waitForSelector("#constellation.done", { timeout: 3000 });
+  assert.match((await page.textContent("#constellation-msg")).trim(), /heart/i);
+});
+
+test("idle butterfly appears after inactivity", async () => {
+  const ctx = await browser.newContext();
+  try {
+    const p = await ctx.newPage();
+    await p.addInitScript(() => { window.MO_IDLE_MS = 300; });
+    await p.goto(baseURL + "festival.html", { waitUntil: "load" });
+    await p.waitForSelector(".butterfly", { timeout: 4000 });
+    assert.ok(await p.locator(".butterfly").count(), "a butterfly should drift in when idle");
+  } finally {
+    await ctx.close();
+  }
+});
+
+test("cinematic intro plays when arriving from the quiz", async () => {
+  const ctx = await browser.newContext();
+  try {
+    const p = await ctx.newPage();
+    await p.addInitScript(() => {
+      try { sessionStorage.setItem("mo-fromQuiz", "1"); } catch (e) { /* ignore */ }
+    });
+    await p.goto(baseURL + "festival.html", { waitUntil: "load" });
+    await p.waitForSelector("#intro.show", { timeout: 3000 });
+    assert.ok(await p.locator("#intro.show").count(), "intro overlay should play");
+  } finally {
+    await ctx.close();
+  }
+});
+
 test("no uncaught page errors occurred during interaction", () => {
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join("; ")}`);
 });

@@ -12,6 +12,7 @@ const CORE = [
   "./festival.html",
   "./styles/main.css",
   "./scripts/content.js",
+  "./scripts/effects.js",
   "./scripts/quiz.js",
   "./scripts/main.js",
   "./manifest.webmanifest",

@@ -117,10 +117,13 @@ tooling.
 ├── styles/
 │   └── main.css                # All styling for both pages (quiz, festival, scratch, etc.)
 ├── scripts/
-│   ├── content.js              # ALL editable content (jokes, fortunes, coupons, daily notes, QUIZ, SCRATCH…). Edit here.
+│   ├── content.js              # ALL editable content (jokes, fortunes, coupons, daily notes, QUIZ, SCRATCH,
+│   │                           #   WISHES, LETTER, LOVE_NOTES, TELLER, MASCOT_REACTIONS, WHEEL, SLOT…). Edit here.
+│   ├── effects.js              # Shared MoEffects.confetti()/petals() used by both pages (celebrations).
 │   ├── quiz.js                 # Quiz front-door logic (random 3-of-pool, restart, confetti). Reads window.MoContent.
-│   └── main.js                 # Festival behavior: daily note, countdown, fireworks+candy, cookie,
-│                               #   garden, envelopes, memory, scratch-off, SW registration. Reads window.MoContent.
+│   └── main.js                 # Festival behavior: daily note, countdown, fireworks, cookie, garden,
+│                               #   envelopes, memory, scratch, lantern, wheel, slot, whack, fortune-teller,
+│                               #   constellation, mascot, love-letter, intro, idle. Reads window.MoContent.
 ├── tests/
 │   ├── site.test.js            # node:test unit/structure/logic tests (no browser)
 │   ├── e2e.test.js             # Playwright tests for the FESTIVAL (festival.html) — clicks every feature
@@ -169,6 +172,14 @@ loves (Chinese food, gardening, sweets):
   tiles; completing it shows a win message and sets off the fireworks.
 - **Scratch-off card** ✨ — drag across the gold foil (canvas) to reveal a hidden
   surprise; "New card" picks another. Pure touch/pointer interaction.
+- **More toys:** a **wish lantern** 🏮 (tap to float a lantern up with a wish), a
+  **spin-the-wheel** 🎡 date decider, a **lucky slot machine** 🎰, an **endless
+  love-note draw** 💖, **whack-a-dumpling** 🥟 (timed, best score saved), a
+  **paper fortune-teller** 🥠, and a **connect-the-stars heart** ✨.
+- **Ambient charm:** a tap-to-react **lucky-cat mascot** 🐱, a **typewriter love
+  letter** on arrival, a **cinematic intro** when coming from the quiz, and an
+  **idle butterfly** that drifts by when she lingers. Wins across the site share
+  one **confetti/petal** burst (`scripts/effects.js`), all reduced-motion aware.
 - **Daily love note** 💌 — a different note each day (date-seeded: same all day,
   changes daily; no backend).
 - **Installable PWA** — `manifest.webmanifest` + `sw.js` make it add-to-home-screen

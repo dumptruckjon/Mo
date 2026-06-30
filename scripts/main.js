@@ -25,6 +25,17 @@
       initEnvelopes,
       () => initMemory(fireworks),
       initScratch,
+      initIntro,
+      initLoveLetter,
+      initMascot,
+      initLantern,
+      initWheel,
+      initSlot,
+      initLoveNoteDraw,
+      initWhack,
+      initTeller,
+      initConstellation,
+      initIdle,
     ];
     for (const init of features) {
       try { init(); } catch (e) { console.error("Mo: a feature failed to start:", e); }
@@ -129,6 +140,19 @@
       cookie.classList.add("crack");
       last = pickIndex(C.FORTUNES.length, last);
       text.textContent = C.FORTUNES[last];
+      // A few crumbs scatter on the crack (idea 12).
+      if (!prefersReduce()) {
+        const rect = cookie.getBoundingClientRect();
+        for (let i = 0; i < 6; i++) {
+          const crumb = document.createElement("span");
+          crumb.className = "crumb";
+          crumb.textContent = "🍪";
+          crumb.style.left = (rect.left + rect.width / 2 + (Math.random() - 0.5) * 50) + "px";
+          crumb.style.top = (rect.top + rect.height / 2) + "px";
+          document.body.appendChild(crumb);
+          setTimeout(() => crumb.remove(), 800);
+        }
+      }
     });
   }
 
@@ -252,6 +276,7 @@
         if (matched === pairs) {
           status.textContent = `You did it in ${moves} moves! 💖`;
           if (fireworks) fireworks.celebrate();
+          if (window.MoEffects) window.MoEffects.confetti();
         } else {
           status.textContent = `Nice! ${matched}/${pairs} pairs`;
         }
@@ -348,6 +373,7 @@
         revealed = true;
         wrap.classList.add("revealed");
         canvas.style.display = "none";
+        if (window.MoEffects) window.MoEffects.petals();
       }
     }
 
@@ -373,6 +399,334 @@
 
     if (newBtn) newBtn.addEventListener("click", newCard);
     newCard();
+  }
+
+  function prefersReduce() {
+    return window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+
+  // ---------- Cinematic intro overlay (idea 3) ----------
+  function initIntro() {
+    const el = document.getElementById("intro");
+    if (!el) return;
+    let from = false;
+    try {
+      from = sessionStorage.getItem("mo-fromQuiz") === "1";
+      sessionStorage.removeItem("mo-fromQuiz");
+    } catch (e) { /* ignore */ }
+    if (!from || prefersReduce()) return;
+    el.classList.add("show");
+    setTimeout(() => el.classList.remove("show"), 1200);
+  }
+
+  // ---------- Love-letter typewriter (idea 5) ----------
+  function initLoveLetter() {
+    const el = document.getElementById("love-letter");
+    if (!el || !C.LETTER || !C.LETTER.length) return;
+    const text = randItem(C.LETTER);
+    if (prefersReduce()) { el.textContent = text; el.classList.add("done"); return; }
+    let i = 0;
+    (function type() {
+      el.textContent = text.slice(0, i);
+      i += 1;
+      if (i <= text.length) setTimeout(type, 45);
+      else el.classList.add("done");
+    })();
+  }
+
+  // ---------- Mascot (idea 6) ----------
+  function initMascot() {
+    const m = document.getElementById("mascot");
+    const bubble = document.getElementById("mascot-bubble");
+    if (!m || !bubble || !C.MASCOT_REACTIONS) return;
+    let t = null;
+    m.addEventListener("click", () => {
+      bubble.textContent = randItem(C.MASCOT_REACTIONS);
+      bubble.hidden = false;
+      clearTimeout(t);
+      t = setTimeout(() => { bubble.hidden = true; }, 2500);
+    });
+  }
+
+  // ---------- Wish lantern release (idea 1) ----------
+  function initLantern() {
+    const btn = document.getElementById("lantern-release");
+    const layer = document.getElementById("lantern-layer");
+    const wishEl = document.getElementById("lantern-wish");
+    if (!btn || !layer || !C.WISHES) return;
+    let last = -1;
+    btn.addEventListener("click", () => {
+      last = pickIndex(C.WISHES.length, last);
+      if (wishEl) wishEl.textContent = C.WISHES[last];
+      const lan = document.createElement("span");
+      lan.className = "sky-lantern";
+      lan.textContent = "🏮";
+      lan.style.left = (10 + Math.random() * 80) + "%";
+      layer.appendChild(lan);
+      setTimeout(() => lan.remove(), 7200);
+    });
+  }
+
+  // ---------- Spin the wheel (idea 8) ----------
+  function initWheel() {
+    const wheel = document.getElementById("wheel");
+    const spin = document.getElementById("wheel-spin");
+    const result = document.getElementById("wheel-result");
+    if (!wheel || !spin || !C.WHEEL || !C.WHEEL.length) return;
+    let rotation = 0;
+    let spinning = false;
+    spin.addEventListener("click", () => {
+      if (spinning) return;
+      spinning = true;
+      if (result) result.textContent = "";
+      const n = C.WHEEL.length;
+      const idx = Math.floor(Math.random() * n);
+      rotation += 4 * 360 + (360 - idx * (360 / n));
+      wheel.style.transform = `rotate(${rotation}deg)`;
+      setTimeout(() => {
+        if (result) result.textContent = "→ " + C.WHEEL[idx];
+        spinning = false;
+      }, prefersReduce() ? 50 : 2700);
+    });
+  }
+
+  // ---------- Lucky slot machine (idea 9) ----------
+  function initSlot() {
+    const spin = document.getElementById("slot-spin");
+    const result = document.getElementById("slot-result");
+    const reels = [0, 1, 2].map((i) => document.getElementById("reel" + i));
+    if (!spin || reels.some((r) => !r) || !C.SLOT) return;
+    let spinning = false;
+    spin.addEventListener("click", () => {
+      if (spinning) return;
+      spinning = true;
+      if (result) result.textContent = "";
+      reels.forEach((r) => r.classList.add("spinning"));
+      const cyc = setInterval(() => {
+        reels.forEach((r) => {
+          if (r.classList.contains("spinning")) r.textContent = randItem(C.SLOT);
+        });
+      }, 100);
+      const finals = reels.map(() => randItem(C.SLOT));
+      reels.forEach((r, i) => {
+        setTimeout(() => {
+          r.classList.remove("spinning");
+          r.textContent = finals[i];
+          if (i === reels.length - 1) {
+            clearInterval(cyc);
+            const won = finals[0] === finals[1] && finals[1] === finals[2];
+            if (result) result.textContent = won ? randItem(C.SLOT_PRIZES) : "So close — pull again! 🎰";
+            if (won && window.MoEffects) window.MoEffects.confetti();
+            spinning = false;
+          }
+        }, 500 + i * 450);
+      });
+    });
+  }
+
+  // ---------- Endless love-note draw (idea 10) ----------
+  function initLoveNoteDraw() {
+    const note = document.getElementById("draw-note");
+    const btn = document.getElementById("draw-btn");
+    if (!note || !btn || !C.LOVE_NOTES) return;
+    let last = -1;
+    btn.addEventListener("click", () => {
+      last = pickIndex(C.LOVE_NOTES.length, last);
+      note.textContent = C.LOVE_NOTES[last];
+    });
+  }
+
+  // ---------- Whack-a-dumpling (idea 14) ----------
+  function initWhack() {
+    const grid = document.getElementById("whack-grid");
+    const status = document.getElementById("whack-status");
+    const startBtn = document.getElementById("whack-start");
+    if (!grid || !status || !startBtn) return;
+    const N = 9;
+    const KEY = "mo-whack-best";
+    const cells = [];
+    let running = false, score = 0, timeLeft = 0, popTimer = null, tickTimer = null;
+
+    function best() { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } }
+    function updateStatus() {
+      status.textContent = running
+        ? `Score: ${score} · ⏱️ ${timeLeft}s`
+        : `Game over! Score ${score} · Best ${best()}`;
+    }
+    for (let i = 0; i < N; i++) {
+      const c = document.createElement("button");
+      c.type = "button";
+      c.className = "whack-cell";
+      c.setAttribute("aria-label", "dumpling hole");
+      c.addEventListener("click", () => {
+        if (running && c.classList.contains("up")) {
+          c.classList.remove("up");
+          c.classList.add("bonk");
+          c.textContent = "";
+          setTimeout(() => c.classList.remove("bonk"), 300);
+          score += 1;
+          updateStatus();
+        }
+      });
+      grid.appendChild(c);
+      cells.push(c);
+    }
+    function clearAll() { cells.forEach((c) => { c.classList.remove("up"); c.textContent = ""; }); }
+    function pop() {
+      if (!running) return;
+      clearAll();
+      const c = cells[Math.floor(Math.random() * N)];
+      c.classList.add("up");
+      c.textContent = "🥟";
+      popTimer = setTimeout(() => {
+        c.classList.remove("up");
+        c.textContent = "";
+        if (running) pop();
+      }, 700 + Math.random() * 300);
+    }
+    function endGame() {
+      running = false;
+      clearTimeout(popTimer);
+      clearInterval(tickTimer);
+      clearAll();
+      try { if (score > best()) localStorage.setItem(KEY, String(score)); } catch (e) { /* ignore */ }
+      updateStatus();
+    }
+    function startGame() {
+      if (running) return;
+      running = true; score = 0; timeLeft = 20;
+      updateStatus();
+      pop();
+      tickTimer = setInterval(() => {
+        timeLeft -= 1;
+        updateStatus();
+        if (timeLeft <= 0) endGame();
+      }, 1000);
+    }
+    startBtn.addEventListener("click", startGame);
+  }
+
+  // ---------- Paper fortune teller (idea 16) ----------
+  function initTeller() {
+    const step = document.getElementById("teller-step");
+    const opts = document.getElementById("teller-options");
+    const result = document.getElementById("teller-result");
+    const reset = document.getElementById("teller-reset");
+    if (!step || !opts || !C.TELLER) return;
+    const COLORS = ["Red ❤️", "Gold 💛", "Pink 💗", "Green 💚"];
+    function makeOpts(items, onPick) {
+      opts.innerHTML = "";
+      items.forEach((it) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "teller__opt";
+        b.textContent = it;
+        b.addEventListener("click", () => onPick(it));
+        opts.appendChild(b);
+      });
+    }
+    function startFlow() {
+      if (result) result.textContent = "";
+      if (reset) reset.hidden = true;
+      step.textContent = "Pick a color:";
+      makeOpts(COLORS, () => {
+        step.textContent = "Now pick a number:";
+        makeOpts(["1", "2", "3", "4"], () => {
+          step.textContent = "Your fortune:";
+          opts.innerHTML = "";
+          if (result) result.textContent = randItem(C.TELLER);
+          if (reset) reset.hidden = false;
+        });
+      });
+    }
+    if (reset) reset.addEventListener("click", startFlow);
+    startFlow();
+  }
+
+  // ---------- Connect-the-stars heart (idea 7) ----------
+  // Hand-placed so stars never overlap; order traces a heart outline (close 10→1
+  // completes the top dip).
+  function heartPoints() {
+    return [
+      { px: 50, py: 30 }, { px: 68, py: 18 }, { px: 84, py: 32 }, { px: 76, py: 56 },
+      { px: 60, py: 76 }, { px: 50, py: 90 }, { px: 40, py: 76 }, { px: 24, py: 56 },
+      { px: 16, py: 32 }, { px: 32, py: 18 },
+    ];
+  }
+  function initConstellation() {
+    const box = document.getElementById("constellation");
+    const msg = document.getElementById("constellation-msg");
+    if (!box) return;
+    const pts = heartPoints();
+    const N = pts.length;
+    box.innerHTML = "";
+    const svgNS = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(svgNS, "svg");
+    svg.setAttribute("viewBox", "0 0 100 100");
+    svg.setAttribute("preserveAspectRatio", "none");
+    const poly = document.createElementNS(svgNS, "polyline");
+    poly.setAttribute("fill", "none");
+    poly.setAttribute("stroke", "#ffd24d");
+    poly.setAttribute("stroke-width", "1.4");
+    svg.appendChild(poly);
+    box.appendChild(svg);
+    const stars = [];
+    let next = 0;
+    function pointsStr(k, close) {
+      let s = pts.slice(0, k).map((p) => p.px + "," + p.py).join(" ");
+      if (close) s += " " + pts[0].px + "," + pts[0].py;
+      return s;
+    }
+    pts.forEach((p, i) => {
+      const s = document.createElement("button");
+      s.type = "button";
+      s.className = "star";
+      s.style.left = p.px + "%";
+      s.style.top = p.py + "%";
+      s.textContent = String(i + 1);
+      s.setAttribute("aria-label", "star " + (i + 1));
+      s.dataset.index = String(i);
+      s.addEventListener("click", () => {
+        if (i === next) {
+          s.classList.add("lit");
+          next += 1;
+          poly.setAttribute("points", pointsStr(next, next === N));
+          if (next === N) {
+            box.classList.add("done");
+            if (msg) msg.textContent = "A heart, just for you 💛";
+            if (window.MoEffects) window.MoEffects.petals();
+          }
+        } else {
+          next = 0;
+          stars.forEach((st) => st.classList.remove("lit"));
+          box.classList.remove("done");
+          poly.setAttribute("points", "");
+          if (msg) msg.textContent = "Oops — start at 1 ✨";
+        }
+      });
+      box.appendChild(s);
+      stars.push(s);
+    });
+  }
+
+  // ---------- Idle butterfly (idea 18) ----------
+  function initIdle() {
+    const IDLE_MS = window.MO_IDLE_MS || 15000;
+    let timer = null;
+    let active = false;
+    function spawn() {
+      if (active || prefersReduce()) return;
+      active = true;
+      const b = document.createElement("div");
+      b.className = "butterfly";
+      b.textContent = "🦋";
+      document.body.appendChild(b);
+      setTimeout(() => { b.remove(); active = false; }, 9000);
+    }
+    function reset() { clearTimeout(timer); timer = setTimeout(spawn, IDLE_MS); }
+    ["pointerdown", "keydown", "scroll", "touchstart"].forEach((ev) =>
+      window.addEventListener(ev, reset, { passive: true }));
+    reset();
   }
 
   // ---------- Fireworks + candy (canvas particle system) ----------

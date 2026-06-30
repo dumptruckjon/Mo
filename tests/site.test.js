@@ -68,6 +68,14 @@ test("the festival page has all required UI hooks", () => {
     'id="envelopes"', 'id="envelope-text"',
     'id="memory-grid"', 'id="memory-status"', 'id="memory-new"',
     'id="scratch"', 'id="scratch-canvas"', 'id="scratch-text"', 'id="scratch-new"',
+    'id="intro"', 'id="lantern-layer"', 'id="mascot"', 'id="love-letter"',
+    'id="lantern-release"', 'id="lantern-wish"',
+    'id="wheel"', 'id="wheel-spin"', 'id="wheel-result"',
+    'id="slot"', 'id="reel0"', 'id="slot-spin"', 'id="slot-result"',
+    'id="draw-note"', 'id="draw-btn"',
+    'id="whack-grid"', 'id="whack-status"', 'id="whack-start"',
+    'id="teller-options"', 'id="teller-result"', 'id="teller-reset"',
+    'id="constellation"', 'id="constellation-msg"',
     'id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"',
   ];
   for (const id of ids) assert.ok(html.includes(id), `missing element ${id}`);
@@ -86,6 +94,33 @@ test("the quiz pool is well-formed and includes the signature questions", () => 
   assert.equal(byQ["Who is the naughtiest?"], "Mo");
   assert.equal(byQ["What is Molly's favorite hobby?"], "Pickin' and fartin'");
   assert.equal(byQ["Which gushis are the most commonly shared gushis?"], "LooAyi gushi");
+});
+
+test("content for the new festival widgets is present", () => {
+  const need = {
+    WISHES: 3, LETTER: 1, LOVE_NOTES: 8, TELLER: 4,
+    MASCOT_REACTIONS: 3, WHEEL: 4, SLOT: 3, SLOT_PRIZES: 1,
+  };
+  for (const [key, min] of Object.entries(need)) {
+    assert.ok(Array.isArray(content[key]) && content[key].length >= min,
+      `${key} should have >= ${min} entries, got ${content[key] && content[key].length}`);
+    for (const v of content[key]) assert.ok(typeof v === "string" && v.length > 0, `empty entry in ${key}`);
+  }
+});
+
+test("shared effects + both pages load it", () => {
+  assert.ok(fs.existsSync(path.join(root, "scripts/effects.js")), "effects.js missing");
+  const fx = read("scripts/effects.js");
+  assert.match(fx, /MoEffects/);
+  assert.match(fx, /confetti/);
+  assert.match(fx, /petals/);
+  assert.match(read("index.html"), /scripts\/effects\.js\?v=/, "quiz should load effects.js");
+  assert.match(read("festival.html"), /scripts\/effects\.js\?v=/, "festival should load effects.js");
+  assert.match(read("sw.js"), /effects\.js/, "SW should precache effects.js");
+});
+
+test("quiz flags the cinematic intro for the festival", () => {
+  assert.match(read("scripts/quiz.js"), /mo-fromQuiz/, "quiz should set the from-quiz flag");
 });
 
 test("there are wrong-answer reactions and scratch-card prizes", () => {
@@ -170,8 +205,10 @@ test("main.js wires up every feature", () => {
   const js = read("scripts/main.js");
   for (const sym of [
     "initFoodBackground", "initCountdown", "initFortuneCookie",
-    "initGarden", "initEnvelopes", "initMemory", "initDailyNote", "initScratch", "createFireworks",
-    "reachZero", "mo-flower-count",
+    "initGarden", "initEnvelopes", "initMemory", "initDailyNote", "initScratch",
+    "initIntro", "initLoveLetter", "initMascot", "initLantern", "initWheel", "initSlot",
+    "initLoveNoteDraw", "initWhack", "initTeller", "initConstellation", "initIdle",
+    "createFireworks", "reachZero", "mo-flower-count",
   ]) {
     assert.ok(js.includes(sym), `main.js missing ${sym}`);
   }

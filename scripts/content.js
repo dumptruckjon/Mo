@@ -171,6 +171,88 @@
       "🍜 You + me + noodles = the perfect night.",
       "✨ The real prize is you. (Cheesy, but true.)",
     ],
+
+    // Wishes carried up by released sky lanterns.
+    WISHES: [
+      "A wish for endless dumplings 🥟",
+      "A wish for slow mornings together ☀️",
+      "A wish that you always feel loved 💗",
+      "A wish for more boba runs 🧋",
+      "A wish for a garden that never stops blooming 🌷",
+      "A wish for laughter until it hurts 😂",
+      "A wish for a lifetime of you 🌙",
+      "A wish for sweet dreams tonight ✨",
+    ],
+
+    // The love letter that types itself out when she enters the festival.
+    LETTER: [
+      "Dear Mo — every day with you is the festival. Yours, always. 💌",
+      "Mo, you make ordinary days feel like fireworks. Forever yours. 🎆",
+      "To Mo: of all my favorite places, next to you is the best. 💕",
+    ],
+
+    // Endless love-note draw (a big, bottomless pool).
+    LOVE_NOTES: [
+      "You're the best part of every day.",
+      "I'd choose you in every lifetime. 💞",
+      "You make my whole world softer.",
+      "Being loved by you is my luckiest thing. 🍀",
+      "You're my favorite hello and my safest place.",
+      "Even my bad days are good with you in them.",
+      "You + me is my favorite story. 📖",
+      "I love your laugh more than anything.",
+      "You're proof that good things are real.",
+      "Home is just a word for being near you. 🏠",
+      "You make me want to be sweeter. 🍯",
+      "My heart still skips for you. 💓",
+      "You are deeply, ridiculously loved.",
+      "Thank you for being exactly you.",
+      "I could fall for you a thousand more times.",
+      "You're the wish I didn't know to make. ✨",
+    ],
+
+    // Origami fortune-teller (cootie catcher) outcomes.
+    TELLER: [
+      "Today holds a happy surprise. 🎁",
+      "Someone adores you more than you know. 💗",
+      "Sweetness is coming your way. 🍬",
+      "A good day to be spoiled a little. 🌷",
+      "Expect a hug when you least expect it. 🤗",
+      "Luck and love are on your side. 🍀",
+      "A kiss is owed and will be paid. 😘",
+      "Your smile will fix someone's whole day. 😊",
+    ],
+
+    // Reactions when she taps the festival mascot.
+    MASCOT_REACTIONS: [
+      "招财! Good luck for Mo! 🧧",
+      "Mew~ you're the best! 😺",
+      "I'm your lucky charm today 🍀",
+      "Pspsps… come play! 🐾",
+      "Purrfect. Just like you 💖",
+      "Tap tap! More treats! 🍡",
+    ],
+
+    // Spinner segments for the "what shall we do?" wheel.
+    WHEEL: [
+      "Dumpling dinner 🥟",
+      "Boba run 🧋",
+      "Movie night 🎬",
+      "Dessert first 🍰",
+      "Long walk 🚶",
+      "Lazy cuddles 🛋️",
+      "Dance in the kitchen 💃",
+      "Stargaze 🌌",
+    ],
+
+    // Slot-machine reel symbols + the jackpot lines (shown on 3-of-a-kind).
+    SLOT: ["🥟", "🧋", "🍡", "🥮", "🍰", "🧧"],
+    SLOT_PRIZES: [
+      "JACKPOT! A real date, your pick. 💕",
+      "Three of a kind! Dessert is on me. 🍰",
+      "Winner! Redeem one giant hug. 🤗",
+      "Lucky you — a kiss is owed. 😘",
+    ],
   };
 
   if (typeof module !== "undefined" && module.exports) {

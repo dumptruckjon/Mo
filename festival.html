@@ -18,16 +18,27 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏮</text></svg>" />
 </head>
 <body>
+  <!-- Cinematic intro overlay (plays when arriving from the quiz). -->
+  <div class="intro" id="intro" aria-hidden="true"></div>
   <!-- Fireworks + candy render here, behind everything. -->
   <canvas id="fireworks" aria-hidden="true"></canvas>
   <!-- Gently drifting Chinese food. Populated by JS. -->
   <div id="food-bg" aria-hidden="true"></div>
+  <!-- Released sky lanterns float up here. -->
+  <div id="lantern-layer" aria-hidden="true"></div>
+
+  <!-- Lucky-cat mascot, tap for a reaction. -->
+  <button class="mascot" id="mascot" type="button" aria-label="Lucky cat — tap me">
+    <span class="mascot__cat" aria-hidden="true">🐱</span>
+    <span class="mascot__bubble" id="mascot-bubble" hidden></span>
+  </button>
 
   <main class="page">
     <header class="hero">
       <div class="lanterns" aria-hidden="true">🏮 🧧 🏮</div>
       <h1 class="hero__title">Hi&nbsp;Mo!</h1>
       <p class="hero__subtitle">A tiny festival, just for you. 准备好了吗？</p>
+      <p class="love-letter" id="love-letter" aria-live="polite"></p>
     </header>
 
     <!-- A new little note every day. -->
@@ -86,6 +97,66 @@
       <button class="btn btn--small" id="memory-new" type="button">New game 🔄</button>
     </section>
 
+    <!-- Release a wish lantern. -->
+    <section class="card lantern-sec" aria-labelledby="lan-h">
+      <h2 id="lan-h">Release a wish lantern 🏮</h2>
+      <p class="muted-hint">Send a glowing lantern up with a wish.</p>
+      <button class="btn btn--small" id="lantern-release" type="button">Release 🏮</button>
+      <p class="reveal-text" id="lantern-wish"></p>
+    </section>
+
+    <!-- Spin the wheel: what shall we do? -->
+    <section class="card wheel-sec" aria-labelledby="wh-h">
+      <h2 id="wh-h">Spin: what shall we do? 🎡</h2>
+      <div class="wheel-wrap"><div class="wheel" id="wheel"></div><div class="wheel__pin" aria-hidden="true">▼</div></div>
+      <button class="btn btn--small" id="wheel-spin" type="button">Spin 🎯</button>
+      <p class="reveal-text" id="wheel-result"></p>
+    </section>
+
+    <!-- Lucky slot machine. -->
+    <section class="card slot-sec" aria-labelledby="sl-h">
+      <h2 id="sl-h">Lucky slots 🎰</h2>
+      <div class="slot" id="slot">
+        <span class="slot__reel" id="reel0">🥟</span>
+        <span class="slot__reel" id="reel1">🧧</span>
+        <span class="slot__reel" id="reel2">🍡</span>
+      </div>
+      <button class="btn btn--small" id="slot-spin" type="button">Pull 🎰</button>
+      <p class="reveal-text" id="slot-result"></p>
+    </section>
+
+    <!-- A little love, on tap. -->
+    <section class="card draw-sec" aria-labelledby="dr-h">
+      <h2 id="dr-h">A little love, on tap 💖</h2>
+      <p class="reveal-text" id="draw-note">Tap for a love note…</p>
+      <button class="btn btn--small" id="draw-btn" type="button">Another 💌</button>
+    </section>
+
+    <!-- Whack-a-dumpling. -->
+    <section class="card whack-sec" aria-labelledby="wk-h">
+      <h2 id="wk-h">Whack-a-dumpling 🥟</h2>
+      <p class="whack__status" id="whack-status">Tap Start, then bop the dumplings!</p>
+      <div class="whack-grid" id="whack-grid"></div>
+      <button class="btn btn--small" id="whack-start" type="button">Start ⏱️</button>
+    </section>
+
+    <!-- Paper fortune teller (cootie catcher). -->
+    <section class="card teller-sec" aria-labelledby="tl-h">
+      <h2 id="tl-h">Paper fortune teller 🥠</h2>
+      <p class="teller__step" id="teller-step">Pick a color:</p>
+      <div class="teller__options" id="teller-options"></div>
+      <p class="reveal-text" id="teller-result"></p>
+      <button class="btn btn--small" id="teller-reset" type="button" hidden>Again 🔁</button>
+    </section>
+
+    <!-- Connect-the-stars heart. -->
+    <section class="card constellation-sec" aria-labelledby="con-h">
+      <h2 id="con-h">Connect the stars ✨</h2>
+      <p class="muted-hint">Tap the stars in order (1 → 10) to draw a heart.</p>
+      <div class="constellation" id="constellation"></div>
+      <p class="reveal-text" id="constellation-msg"></p>
+    </section>
+
     <!-- Scratch-off card: drag to reveal a hidden surprise. -->
     <section class="card scratch" id="scratch" aria-labelledby="scratch-h">
       <h2 id="scratch-h">Scratch for a surprise ✨</h2>
@@ -104,6 +175,7 @@
 
   <!-- __BUILD__ is rewritten to the commit SHA at deploy time for cache-busting. -->
   <script src="scripts/content.js?v=__BUILD__" defer></script>
+  <script src="scripts/effects.js?v=__BUILD__" defer></script>
   <script src="scripts/main.js?v=__BUILD__" defer></script>
 </body>
 </html>
