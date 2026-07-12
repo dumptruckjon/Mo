@@ -497,16 +497,21 @@ test("special day: day-of takeover shows the banner, hat, and occasion note", as
   }
 });
 
-test("special day: countdown ribbon appears within 14 days (incl. year wrap) and not otherwise", async () => {
+test("special day: countdown ribbon appears within 14 days and not otherwise", async () => {
   const ctx = await browser.newContext();
   try {
     const p = await ctx.newPage();
-    // 12-29 is 3 days before the placeholder 01-01 birthday — crosses the year boundary.
-    await p.goto(baseURL + "festival.html?mo-date=12-29", { waitUntil: "load" });
+    // 01-17 is 3 days before Mo's birthday (01-20).
+    await p.goto(baseURL + "festival.html?mo-date=01-17", { waitUntil: "load" });
     await p.waitForSelector("#special-ribbon:not([hidden])", { timeout: 4000 });
     const ribbon = await p.textContent("#special-ribbon");
-    assert.match(ribbon, /3 days until/, `ribbon should say 3 days, got: ${ribbon}`);
+    assert.match(ribbon, /3 days until Mo's birthday/, `ribbon should say 3 days, got: ${ribbon}`);
     assert.equal(await p.locator("#special-banner:not([hidden])").count(), 0, "no takeover before the day");
+    // Across the year boundary: 12-29 is 22 days before 01-20 — the wrap math
+    // must land on next year's date and show NO ribbon (not a bogus countdown).
+    await p.goto(baseURL + "festival.html?mo-date=12-29", { waitUntil: "load" });
+    await p.waitForTimeout(400);
+    assert.equal(await p.locator("#special-ribbon:not([hidden])").count(), 0, "no ribbon 22 days out (year wrap)");
     // A date far from every special day shows neither ribbon nor banner.
     await p.goto(baseURL + "festival.html?mo-date=07-20", { waitUntil: "load" });
     await p.waitForTimeout(400);

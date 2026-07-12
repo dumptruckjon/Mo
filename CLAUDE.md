@@ -190,8 +190,8 @@ loves (Chinese food, gardening, sweets):
   Jon must fill in the real story). Tap a lantern to light it and unfold the
   memory card.
 - **Special days** 🎂 — the site remembers by itself (`SPECIAL_DAYS` in
-  `content.js`, MM-DD keys — **birthday/anniversary dates are placeholders**,
-  01-01 and 03-03, until Jon provides the real ones). Within 14 days a countdown
+  `content.js`, MM-DD keys — Mo's birthday **01-20**, the anniversary **10-16**,
+  Valentine's 02-14). Within 14 days a countdown
   ribbon shows ("🎂 9 days until Mo's birthday…", year-wrap handled); on the day
   itself the festival takes over: banner, party hat on the mascot, occasion note
   replacing the daily note, and a one-time confetti/petal burst. Test/preview

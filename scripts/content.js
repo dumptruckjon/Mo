@@ -292,17 +292,16 @@
     ],
 
     // Special days the site remembers by itself. Keys are "MM-DD".
-    // ⚠️ PLACEHOLDER DATES — Jon: set Mo's real birthday + your real anniversary!
     SPECIAL_DAYS: [
       {
-        date: "01-01", // PLACEHOLDER — Mo's real birthday goes here
+        date: "01-20", // Mo's birthday
         label: "Mo's birthday",
         emoji: "🎂",
         banner: "生日快乐, Mo! Happy birthday! The whole festival is your party today 🎂🏮",
         note: "It's your birthday, so today's note is simple: the world is better because you're in it. Cake for breakfast is not only allowed, it's auspicious.",
       },
       {
-        date: "03-03", // PLACEHOLDER — the real anniversary goes here
+        date: "10-16", // our anniversary
         label: "our anniversary",
         emoji: "💍",
         banner: "Happy anniversary, my love! 结婚快乐! Another year of us 💍💛",
