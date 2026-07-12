@@ -140,6 +140,33 @@
       <button class="btn btn--small" id="whack-start" type="button">Start ⏱️</button>
     </section>
 
+    <!-- Noodle catch: drag the bowl, catch the falling treats. -->
+    <section class="card catch-sec" aria-labelledby="ct-h">
+      <h2 id="ct-h">Noodle catch 🍜</h2>
+      <p class="whack__status" id="catch-status">Drag the bowl — catch as many treats as you can!</p>
+      <div class="catch-stage" id="catch-stage" aria-label="Noodle catch play area">
+        <span class="catch-bowl" id="catch-bowl" aria-hidden="true">🥣</span>
+      </div>
+      <button class="btn btn--small" id="catch-start" type="button">Start 🍜</button>
+    </section>
+
+    <!-- Tea ceremony: watch the cups glow, repeat the order. -->
+    <section class="card tea-sec" aria-labelledby="te-h">
+      <h2 id="te-h">Tea ceremony 🍵</h2>
+      <p class="whack__status" id="tea-status">Watch the cups glow, then repeat the order.</p>
+      <div class="tea-grid" id="tea-grid"></div>
+      <button class="btn btn--small" id="tea-start" type="button">Begin 🫖</button>
+    </section>
+
+    <!-- Dumpling stack: tap to drop the swinging dumpling on the pile. -->
+    <section class="card stack-sec" aria-labelledby="st-h">
+      <h2 id="st-h">Dumpling stack 🥟</h2>
+      <p class="whack__status" id="stack-status">Tap the kitchen to drop the dumpling on the pile!</p>
+      <div class="stack-stage" id="stack-stage" role="button" tabindex="0"
+           aria-label="Dumpling stack — tap or press Enter to drop the dumpling"></div>
+      <button class="btn btn--small" id="stack-start" type="button">Start 🥟</button>
+    </section>
+
     <!-- Paper fortune teller (cootie catcher). -->
     <section class="card teller-sec" aria-labelledby="tl-h">
       <h2 id="tl-h">Paper fortune teller 🥠</h2>

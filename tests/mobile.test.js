@@ -110,7 +110,7 @@ test("every small button + heart star meets 44px and stays spaced at 320px", asy
     // 1) Size: every .btn--small and every heart .star is at least 44x44.
     const tooSmall = await small.evaluate(() => {
       const out = [];
-      for (const el of document.querySelectorAll(".btn--small, #constellation .star")) {
+      for (const el of document.querySelectorAll(".btn--small, #constellation .star, .tea-cup")) {
         if (el.hidden || el.closest("[hidden]") || el.offsetParent === null) continue; // skip hidden
         const r = el.getBoundingClientRect();
         if (r.width === 0 && r.height === 0) continue;

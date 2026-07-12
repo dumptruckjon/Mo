@@ -344,6 +344,124 @@ test("cinematic intro plays when arriving from the quiz", async () => {
   }
 });
 
+test("noodle catch: the bowl tracks the pointer and treats can be caught", async () => {
+  await page.evaluate(() => { window.MO_CATCH_MS = 5000; }); // short round for the test
+  const stageLoc = page.locator("#catch-stage");
+  await stageLoc.scrollIntoViewIfNeeded();
+  await page.locator("#catch-start").click();
+  const stage = await stageLoc.boundingBox();
+  // Chase the lowest falling treat with the pointer so the bowl catches it.
+  const deadline = Date.now() + 5500;
+  let caught = false;
+  while (Date.now() < deadline && !caught) {
+    const x = await page.evaluate(() => {
+      const stageEl = document.getElementById("catch-stage");
+      const items = [...stageEl.querySelectorAll(".catch-item")];
+      if (!items.length) return null;
+      let low = items[0], ly = -Infinity;
+      for (const it of items) {
+        const r = it.getBoundingClientRect();
+        if (r.top > ly) { ly = r.top; low = it; }
+      }
+      const r = low.getBoundingClientRect(), s = stageEl.getBoundingClientRect();
+      return r.x + r.width / 2 - s.x;
+    });
+    if (x != null) {
+      await page.mouse.move(
+        stage.x + Math.max(5, Math.min(stage.width - 5, x)),
+        stage.y + stage.height / 2
+      );
+    }
+    caught = await page.evaluate(
+      () => /Caught: [1-9]/.test(document.getElementById("catch-status").textContent)
+    );
+    await page.waitForTimeout(50);
+  }
+  assert.ok(caught, "should catch at least one treat while tracking the fall");
+  // The round ends on its own and reports the best score.
+  await page.waitForFunction(
+    () => /Best/.test(document.getElementById("catch-status").textContent),
+    null, { timeout: 7000 }
+  );
+  assert.ok(await page.locator("#catch-start:not([hidden])").count(), "start button returns");
+});
+
+test("tea ceremony: repeating the sequence advances; a wrong cup ends the game", async () => {
+  await page.evaluate(() => { window.MO_TEA_STEP_MS = 140; }); // fast playback for the test
+  await page.locator("#tea-start").scrollIntoViewIfNeeded();
+  await page.locator("#tea-start").click();
+  await page.waitForFunction(
+    () => /your turn/i.test(document.getElementById("tea-status").textContent),
+    null, { timeout: 4000 }
+  );
+  let seq = await page.evaluate(() => document.getElementById("tea-grid").dataset.seq);
+  assert.equal(seq.length, 1, "round 1 has a one-cup sequence");
+  await page.locator(".tea-cup").nth(Number(seq[0])).click();
+  await page.waitForFunction(
+    () => /Round 2 — your turn/i.test(document.getElementById("tea-status").textContent),
+    null, { timeout: 5000 }
+  );
+  seq = await page.evaluate(() => document.getElementById("tea-grid").dataset.seq);
+  assert.equal(seq.length, 2, "round 2 has a two-cup sequence");
+  // First cup right, second deliberately wrong → game over with a best score.
+  await page.locator(".tea-cup").nth(Number(seq[0])).click();
+  await page.locator(".tea-cup").nth((Number(seq[1]) + 1) % 4).click();
+  await page.waitForFunction(
+    () => /Best/.test(document.getElementById("tea-status").textContent),
+    null, { timeout: 3000 }
+  );
+  assert.ok(await page.locator("#tea-start:not([hidden])").count(), "start button returns");
+});
+
+test("dumpling stack: a timed drop lands, a wild one ends the game", async () => {
+  await page.locator("#stack-start").scrollIntoViewIfNeeded();
+  await page.locator("#stack-start").click();
+  // Drop when the swinging dumpling passes the plate centre. The alignment
+  // check and the click happen in the SAME frame inside the page — waiting
+  // from the test process and then clicking would let the dumpling drift.
+  await page.evaluate(() => new Promise((resolve) => {
+    const stage = document.getElementById("stack-stage");
+    (function check() {
+      const mover = stage.querySelector(".stack-mover");
+      if (!mover) return resolve();
+      const s = stage.getBoundingClientRect(), m = mover.getBoundingClientRect();
+      if (Math.abs((m.x + m.width / 2) - (s.x + s.width / 2)) < 15) {
+        stage.click();
+        resolve();
+      } else {
+        requestAnimationFrame(check);
+      }
+    })();
+  }));
+  await page.waitForFunction(
+    () => /Height: 1/.test(document.getElementById("stack-status").textContent),
+    null, { timeout: 2000 }
+  );
+  assert.equal(await page.locator("#stack-stage .stack-dumpling").count(), 1);
+  // Now drop when far from the stack → miss → game over. Same in-page
+  // check-and-click so the reading can't go stale.
+  await page.evaluate(() => new Promise((resolve) => {
+    const stage = document.getElementById("stack-stage");
+    (function check() {
+      const mover = stage.querySelector(".stack-mover");
+      const top = stage.querySelector(".stack-dumpling");
+      if (!mover || !top) return resolve();
+      const m = mover.getBoundingClientRect(), t = top.getBoundingClientRect();
+      if (Math.abs((m.x + m.width / 2) - (t.x + t.width / 2)) > 90) {
+        stage.click();
+        resolve();
+      } else {
+        requestAnimationFrame(check);
+      }
+    })();
+  }));
+  await page.waitForFunction(
+    () => /Best/.test(document.getElementById("stack-status").textContent),
+    null, { timeout: 2000 }
+  );
+  assert.ok(await page.locator("#stack-start:not([hidden])").count(), "start button returns");
+});
+
 test("no uncaught page errors occurred during interaction", () => {
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join("; ")}`);
 });

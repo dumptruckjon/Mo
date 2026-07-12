@@ -123,7 +123,8 @@ tooling.
 │   ├── quiz.js                 # Quiz front-door logic (random 3-of-pool, restart, confetti). Reads window.MoContent.
 │   └── main.js                 # Festival behavior: daily note, countdown, fireworks, cookie, garden,
 │                               #   envelopes, memory, scratch, lantern, wheel, slot, whack, fortune-teller,
-│                               #   constellation, mascot, love-letter, intro, idle. Reads window.MoContent.
+│                               #   constellation, mascot, love-letter, intro, idle, noodle-catch,
+│                               #   tea-ceremony, dumpling-stack. Reads window.MoContent.
 ├── tests/
 │   ├── site.test.js            # node:test unit/structure/logic tests (no browser)
 │   ├── e2e.test.js             # Playwright tests for the FESTIVAL (festival.html) — clicks every feature
@@ -176,6 +177,13 @@ loves (Chinese food, gardening, sweets):
   **spin-the-wheel** 🎡 date decider, a **lucky slot machine** 🎰, an **endless
   love-note draw** 💖, **whack-a-dumpling** 🥟 (timed, best score saved), a
   **paper fortune-teller** 🥠, and a **connect-the-stars heart** ✨.
+- **Mini-games (set 2):** **Noodle catch** 🍜 (drag the bowl to catch 20s of
+  falling treats; best saved), **Tea ceremony** 🍵 (Simon-style watch-and-repeat
+  with four cups; best round saved), and **Dumpling stack** 🥟 (tap to drop the
+  swinging dumpling on the pile; height record saved). All three end with a
+  cheeky message from `content.js`, fire confetti on a new best, keep tap
+  targets ≥ 44px, and never hijack page scroll (the catch stage only locks
+  `touch-action` while a round is live).
 - **Ambient charm:** a tap-to-react **lucky-cat mascot** 🐱, a **typewriter love
   letter** on arrival, a **cinematic intro** when coming from the quiz, and an
   **idle butterfly** that drifts by when she lingers. Wins across the site share

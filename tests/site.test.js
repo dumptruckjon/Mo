@@ -74,6 +74,9 @@ test("the festival page has all required UI hooks", () => {
     'id="slot"', 'id="reel0"', 'id="slot-spin"', 'id="slot-result"',
     'id="draw-note"', 'id="draw-btn"',
     'id="whack-grid"', 'id="whack-status"', 'id="whack-start"',
+    'id="catch-stage"', 'id="catch-bowl"', 'id="catch-status"', 'id="catch-start"',
+    'id="tea-grid"', 'id="tea-status"', 'id="tea-start"',
+    'id="stack-stage"', 'id="stack-status"', 'id="stack-start"',
     'id="teller-options"', 'id="teller-result"', 'id="teller-reset"',
     'id="constellation"', 'id="constellation-msg"',
     'id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"',
@@ -100,6 +103,7 @@ test("content for the new festival widgets is present", () => {
   const need = {
     WISHES: 3, LETTER: 1, LOVE_NOTES: 8, TELLER: 4,
     MASCOT_REACTIONS: 3, WHEEL: 4, SLOT: 3, SLOT_PRIZES: 1,
+    CATCH_ITEMS: 4, CATCH_MSGS: 3, TEA_CUPS: 4, TEA_MSGS: 3, STACK_MSGS: 3,
   };
   for (const [key, min] of Object.entries(need)) {
     assert.ok(Array.isArray(content[key]) && content[key].length >= min,
@@ -208,6 +212,8 @@ test("main.js wires up every feature", () => {
     "initGarden", "initEnvelopes", "initMemory", "initDailyNote", "initScratch",
     "initIntro", "initLoveLetter", "initMascot", "initLantern", "initWheel", "initSlot",
     "initLoveNoteDraw", "initWhack", "initTeller", "initConstellation", "initIdle",
+    "initNoodleCatch", "initTeaCeremony", "initStack",
+    "mo-catch-best", "mo-tea-best", "mo-stack-best",
     "createFireworks", "reachZero", "mo-flower-count",
   ]) {
     assert.ok(js.includes(sym), `main.js missing ${sym}`);

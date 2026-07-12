@@ -253,6 +253,32 @@
       "Winner! Redeem one giant hug. 🤗",
       "Lucky you — a kiss is owed. 😘",
     ],
+
+    // Noodle Catch: the treats that rain down, and end-of-round cheers.
+    CATCH_ITEMS: ["🥟", "🍜", "🧋", "🍡", "🥮", "🍬", "🍥"],
+    CATCH_MSGS: [
+      "A feast! You caught dinner for two 🍜💕",
+      "Quick chopsticks, Mo! 🥢",
+      "Not a single dumpling wasted 🥟",
+      "The noodle gods smile upon you ✨",
+    ],
+
+    // Tea Ceremony: the four cups shown in the grid + end-of-game cheers.
+    TEA_CUPS: ["🍵", "🧋", "🫖", "☕"],
+    TEA_MSGS: [
+      "A perfect pour! 🍵",
+      "Tea master Mo strikes again 🫖",
+      "Steeped in brilliance ✨",
+      "Boba-lievable memory! 🧋",
+    ],
+
+    // Dumpling Stack: end-of-game cheers.
+    STACK_MSGS: [
+      "A tower of deliciousness! 🥟",
+      "Dumpling architect of the year 🏗️",
+      "Steamy skyline achieved 🌆",
+      "One wobble away from greatness 💛",
+    ],
   };
 
   if (typeof module !== "undefined" && module.exports) {

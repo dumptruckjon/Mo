@@ -558,6 +558,105 @@ body {
 .whack-cell.up { color: #000; background: rgba(255, 247, 230, 0.95); animation: pop 0.2s ease; }
 .whack-cell.bonk { animation: crack 0.3s ease; }
 
+/* ---------- Noodle catch ---------- */
+.catch-stage {
+  position: relative;
+  height: 240px;
+  max-width: 420px;
+  margin: 0 auto 0.85rem;
+  border: 2px solid rgba(255, 210, 77, 0.5);
+  border-radius: 14px;
+  overflow: hidden;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.15));
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+/* While playing, the finger drives the bowl — don't let the page scroll. */
+.catch-stage.playing { touch-action: none; }
+.catch-bowl {
+  position: absolute;
+  bottom: 2px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.6rem;
+  pointer-events: none;
+}
+.catch-item {
+  position: absolute;
+  top: -30px;
+  transform: translateX(-50%);
+  font-size: 1.7rem;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ---------- Tea ceremony ---------- */
+.tea-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+  max-width: 260px;
+  margin: 0 auto 0.85rem;
+}
+.tea-cup {
+  min-height: 74px;
+  font-size: 2rem;
+  border: 2px solid rgba(255, 210, 77, 0.5);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.tea-cup.glow {
+  background: var(--gold);
+  box-shadow: 0 0 14px var(--gold);
+  transform: scale(1.06);
+}
+
+/* ---------- Dumpling stack ---------- */
+.stack-stage {
+  position: relative;
+  height: 240px;
+  max-width: 420px;
+  margin: 0 auto 0.85rem;
+  border: 2px solid rgba(255, 210, 77, 0.5);
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+  background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.15));
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.stack-stage::before {
+  content: "🍽️";
+  position: absolute;
+  bottom: -8px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 2.8rem;
+  opacity: 0.9;
+  pointer-events: none;
+}
+.stack-mover {
+  position: absolute;
+  top: 12px; left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.9rem;
+  pointer-events: none;
+  will-change: left;
+}
+.stack-mover.stack-miss {
+  transition: top 0.5s ease-in, transform 0.5s ease-in, opacity 0.5s;
+  top: 210px;
+  transform: translateX(-50%) rotate(140deg);
+  opacity: 0.6;
+}
+.stack-dumpling {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: 1.9rem;
+  pointer-events: none;
+}
+
 /* ---------- Fortune teller (idea 16) ---------- */
 .teller__step { margin: 0 0 0.75rem; font-weight: 700; color: var(--gold); }
 .teller__options { display: flex; flex-wrap: wrap; gap: 0.6rem; justify-content: center; }

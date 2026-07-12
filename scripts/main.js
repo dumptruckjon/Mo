@@ -33,6 +33,9 @@
       initSlot,
       initLoveNoteDraw,
       initWhack,
+      initNoodleCatch,
+      initTeaCeremony,
+      initStack,
       initTeller,
       initConstellation,
       initIdle,
@@ -603,6 +606,255 @@
         if (timeLeft <= 0) endGame();
       }, 1000);
     }
+    startBtn.addEventListener("click", startGame);
+  }
+
+  // ---------- Noodle catch: drag the bowl, catch falling treats ----------
+  function initNoodleCatch() {
+    const stage = document.getElementById("catch-stage");
+    const bowl = document.getElementById("catch-bowl");
+    const status = document.getElementById("catch-status");
+    const startBtn = document.getElementById("catch-start");
+    if (!stage || !bowl || !status || !startBtn || !C.CATCH_ITEMS || !C.CATCH_ITEMS.length) return;
+    const KEY = "mo-catch-best";
+    let running = false, score = 0, timeLeft = 0;
+    let raf = null, spawnTimer = null, tickTimer = null, last = 0;
+    let items = []; // { el, x, y, v } — y is distance fallen from above the stage
+    let bowlX = 0;
+
+    function best() { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } }
+    function setBowl(x) {
+      bowlX = Math.max(24, Math.min(stage.clientWidth - 24, x));
+      bowl.style.left = bowlX + "px";
+    }
+    function onPoint(e) {
+      if (!running) return;
+      setBowl(e.clientX - stage.getBoundingClientRect().left);
+    }
+    stage.addEventListener("pointermove", onPoint);
+    stage.addEventListener("pointerdown", onPoint);
+
+    function spawn() {
+      if (!running) return;
+      const el = document.createElement("span");
+      el.className = "catch-item";
+      el.textContent = randItem(C.CATCH_ITEMS);
+      const x = 20 + Math.random() * Math.max(1, stage.clientWidth - 40);
+      el.style.left = x + "px";
+      stage.appendChild(el);
+      items.push({ el, x, y: -30, v: 80 + Math.random() * 70 });
+      spawnTimer = setTimeout(spawn, 500 + Math.random() * 350);
+    }
+    function updateStatus() {
+      status.textContent = `⏱️ ${timeLeft}s · Caught: ${score}`;
+    }
+    function loop(ts) {
+      if (!running) return;
+      const dt = last ? Math.min(50, ts - last) / 1000 : 0;
+      last = ts;
+      const catchY = stage.clientHeight - 28; // the bowl's rim band
+      items = items.filter((it) => {
+        it.y += it.v * dt;
+        it.el.style.transform = `translateY(${it.y + 30}px)`;
+        if (it.y >= catchY && Math.abs(it.x - bowlX) < 44) {
+          score += 1;
+          it.el.remove();
+          updateStatus();
+          return false;
+        }
+        if (it.y > stage.clientHeight + 20) { it.el.remove(); return false; }
+        return true;
+      });
+      raf = requestAnimationFrame(loop);
+    }
+    function endGame() {
+      running = false;
+      clearTimeout(spawnTimer);
+      clearInterval(tickTimer);
+      cancelAnimationFrame(raf);
+      items.forEach((it) => it.el.remove());
+      items = [];
+      stage.classList.remove("playing");
+      startBtn.hidden = false;
+      const isBest = score > best();
+      try { if (isBest) localStorage.setItem(KEY, String(score)); } catch (e) { /* ignore */ }
+      status.textContent =
+        `${isBest && score > 0 ? "New best! " : ""}${randItem(C.CATCH_MSGS || [""])} Caught ${score} · Best ${best()}`;
+      if (isBest && score > 0 && window.MoEffects) window.MoEffects.confetti();
+    }
+    function startGame() {
+      if (running) return;
+      running = true; score = 0; last = 0;
+      timeLeft = Math.round((window.MO_CATCH_MS || 20000) / 1000);
+      stage.classList.add("playing");
+      startBtn.hidden = true;
+      setBowl(stage.clientWidth / 2);
+      updateStatus();
+      spawn();
+      raf = requestAnimationFrame(loop);
+      tickTimer = setInterval(() => {
+        timeLeft -= 1;
+        if (timeLeft <= 0) endGame(); else updateStatus();
+      }, 1000);
+    }
+    startBtn.addEventListener("click", startGame);
+  }
+
+  // ---------- Tea ceremony: a watch-and-repeat sequence game ----------
+  function initTeaCeremony() {
+    const grid = document.getElementById("tea-grid");
+    const status = document.getElementById("tea-status");
+    const startBtn = document.getElementById("tea-start");
+    if (!grid || !status || !startBtn || !C.TEA_CUPS || C.TEA_CUPS.length < 4) return;
+    const KEY = "mo-tea-best";
+    const step = () => window.MO_TEA_STEP_MS || 460;
+    const cups = [];
+    let seq = [], pos = 0, accepting = false, playing = false;
+
+    function best() { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } }
+    C.TEA_CUPS.slice(0, 4).forEach((emoji, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "tea-cup";
+      b.textContent = emoji;
+      b.setAttribute("aria-label", "cup " + (i + 1));
+      b.addEventListener("click", () => tap(i));
+      grid.appendChild(b);
+      cups.push(b);
+    });
+    function glow(i, ms) {
+      cups[i].classList.add("glow");
+      setTimeout(() => cups[i].classList.remove("glow"), ms);
+    }
+    function playback() {
+      accepting = false;
+      status.textContent = `Round ${seq.length} — watch… 👀`;
+      grid.dataset.seq = seq.join("");
+      seq.forEach((cup, k) => setTimeout(() => glow(cup, step() * 0.6), step() * (k + 1)));
+      setTimeout(() => {
+        pos = 0;
+        accepting = true;
+        status.textContent = `Round ${seq.length} — your turn! 🍵`;
+      }, step() * (seq.length + 1));
+    }
+    function nextRound() {
+      seq.push(Math.floor(Math.random() * cups.length));
+      playback();
+    }
+    function tap(i) {
+      if (!playing || !accepting) return;
+      glow(i, 200);
+      if (i === seq[pos]) {
+        pos += 1;
+        if (pos === seq.length) {
+          accepting = false;
+          setTimeout(nextRound, 650);
+        }
+      } else {
+        endGame();
+      }
+    }
+    function endGame() {
+      playing = false;
+      accepting = false;
+      const rounds = Math.max(0, seq.length - 1); // the last round wasn't completed
+      const isBest = rounds > best();
+      try { if (isBest) localStorage.setItem(KEY, String(rounds)); } catch (e) { /* ignore */ }
+      status.textContent =
+        `${randItem(C.TEA_MSGS || [""])} ${rounds} round${rounds === 1 ? "" : "s"} · Best ${best()}`;
+      startBtn.hidden = false;
+      if (isBest && rounds > 0 && window.MoEffects) window.MoEffects.confetti();
+    }
+    startBtn.addEventListener("click", () => {
+      if (playing) return;
+      playing = true;
+      seq = [];
+      startBtn.hidden = true;
+      nextRound();
+    });
+  }
+
+  // ---------- Dumpling stack: tap to drop the swinging dumpling ----------
+  function initStack() {
+    const stage = document.getElementById("stack-stage");
+    const status = document.getElementById("stack-status");
+    const startBtn = document.getElementById("stack-start");
+    if (!stage || !status || !startBtn) return;
+    const KEY = "mo-stack-best";
+    let running = false, raf = null, t = 0, last = 0, speed = 1.6;
+    let mover = null, moverX = 0, level = 0, topX = 0;
+    let placed = [];
+
+    function best() { try { return Number(localStorage.getItem(KEY)) || 0; } catch (e) { return 0; } }
+    function rowBottom(row) { return 10 + Math.min(row, 4) * 30; } // show at most 5 rows
+    function loop(ts) {
+      if (!running) return;
+      const dt = last ? Math.min(50, ts - last) / 1000 : 0;
+      last = ts;
+      t += dt * speed;
+      const w = stage.clientWidth;
+      moverX = w / 2 + Math.sin(t) * (w / 2 - 30);
+      mover.style.left = moverX + "px";
+      raf = requestAnimationFrame(loop);
+    }
+    function drop() {
+      if (!running || !mover) return;
+      const target = level === 0 ? stage.clientWidth / 2 : topX;
+      const tolerance = level === 0 ? 60 : Math.max(16, 34 - level * 2);
+      if (Math.abs(moverX - target) <= tolerance) {
+        const d = document.createElement("span");
+        d.className = "stack-dumpling";
+        d.textContent = "🥟";
+        d.style.left = moverX + "px";
+        d.style.bottom = rowBottom(level) + "px";
+        stage.appendChild(d);
+        placed.push(d);
+        if (level >= 4) {
+          // Slide the tower down a row so it stays in view.
+          placed.forEach((el) => {
+            el.style.bottom = (parseFloat(el.style.bottom) - 30) + "px";
+            if (parseFloat(el.style.bottom) < 0) el.remove();
+          });
+          placed = placed.filter((el) => el.isConnected);
+        }
+        topX = moverX;
+        level += 1;
+        speed = Math.min(4.2, speed * 1.09);
+        status.textContent = `Height: ${level} 🥟 — tap to drop!`;
+      } else {
+        mover.classList.add("stack-miss");
+        endGame();
+      }
+    }
+    function endGame() {
+      running = false;
+      cancelAnimationFrame(raf);
+      const isBest = level > best();
+      try { if (isBest) localStorage.setItem(KEY, String(level)); } catch (e) { /* ignore */ }
+      status.textContent =
+        `${isBest && level > 0 ? "New best! " : ""}${randItem(C.STACK_MSGS || [""])} Stacked ${level} · Best ${best()}`;
+      startBtn.hidden = false;
+      if (isBest && level > 0 && window.MoEffects) window.MoEffects.confetti();
+    }
+    function startGame() {
+      if (running) return;
+      stage.querySelectorAll(".stack-dumpling, .stack-mover").forEach((el) => el.remove());
+      placed = [];
+      running = true; level = 0; t = 0; last = 0; speed = 1.6;
+      topX = stage.clientWidth / 2;
+      moverX = topX; // matches the CSS 50% start — a tap before the first frame must not read a stale 0
+      mover = document.createElement("span");
+      mover.className = "stack-mover";
+      mover.textContent = "🥟";
+      stage.appendChild(mover);
+      startBtn.hidden = true;
+      status.textContent = "Height: 0 🥟 — tap to drop!";
+      raf = requestAnimationFrame(loop);
+    }
+    stage.addEventListener("click", drop);
+    stage.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); drop(); }
+    });
     startBtn.addEventListener("click", startGame);
   }
 
