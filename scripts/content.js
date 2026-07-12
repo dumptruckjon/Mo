@@ -279,6 +279,46 @@
       "Steamy skyline achieved 🌆",
       "One wobble away from greatness 💛",
     ],
+
+    // Memory Lane: one lantern per real milestone, in order.
+    // ⚠️ PLACEHOLDERS — Jon: replace every entry with your real story!
+    MILESTONES: [
+      { when: "The day we met", scene: "✨👀✨", note: "Placeholder: the day the whole world got noticeably better." },
+      { when: "Our first date", scene: "🥟🍜🧋", note: "Placeholder: you ordered dumplings. I was done for." },
+      { when: "The first 'I love you'", scene: "💛🌙💛", note: "Placeholder: said quietly, meant enormously." },
+      { when: "The proposal", scene: "💍🎆😭", note: "Placeholder: best yes in recorded history." },
+      { when: "Our wedding day", scene: "👰🤵💒", note: "Placeholder: everyone cried. Especially me." },
+      { when: "Today", scene: "🏮💖🏮", note: "Still my favorite person. The best is still cooking." },
+    ],
+
+    // Special days the site remembers by itself. Keys are "MM-DD".
+    // ⚠️ PLACEHOLDER DATES — Jon: set Mo's real birthday + your real anniversary!
+    SPECIAL_DAYS: [
+      {
+        date: "01-01", // PLACEHOLDER — Mo's real birthday goes here
+        label: "Mo's birthday",
+        emoji: "🎂",
+        banner: "生日快乐, Mo! Happy birthday! The whole festival is your party today 🎂🏮",
+        note: "It's your birthday, so today's note is simple: the world is better because you're in it. Cake for breakfast is not only allowed, it's auspicious.",
+      },
+      {
+        date: "03-03", // PLACEHOLDER — the real anniversary goes here
+        label: "our anniversary",
+        emoji: "💍",
+        banner: "Happy anniversary, my love! 结婚快乐! Another year of us 💍💛",
+        note: "Happy anniversary! Marrying you remains my best decision, narrowly beating 'let's get dumplings AND boba.'",
+      },
+      {
+        date: "02-14",
+        label: "Valentine's Day",
+        emoji: "💘",
+        banner: "情人节快乐! Happy Valentine's Day to my favorite valentine 💘",
+        note: "Roses are red, dumplings are steamed, you're even better than the wife I dreamed.",
+      },
+    ],
+
+    // The hidden 888 jackpot (8 fast taps on the lucky cat). One of a kind.
+    SECRET_888: "8️⃣8️⃣8️⃣ 发发发! You found the luckiest secret on the whole site. It exists to tell you one thing, hidden where only a serial cat-tapper would look: of all the luck I've ever had, you are the jackpot, Mo. 🧧💛",
   };
 
   if (typeof module !== "undefined" && module.exports) {

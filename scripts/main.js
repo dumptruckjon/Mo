@@ -18,6 +18,8 @@
     // Isolate each feature: if one throws, the others still work.
     const features = [
       initDailyNote,
+      initSpecialDays, // after the daily note so a special day can override it
+      initMemoryLane,
       initFoodBackground,
       () => initCountdown(fireworks),
       initFortuneCookie,
@@ -442,13 +444,124 @@
     const m = document.getElementById("mascot");
     const bubble = document.getElementById("mascot-bubble");
     if (!m || !bubble || !C.MASCOT_REACTIONS) return;
+    const star = document.getElementById("mascot-star");
+    const KEY = "mo-888-found";
+    const found = () => { try { return localStorage.getItem(KEY) === "1"; } catch (e) { return false; } };
+    if (star && found()) star.hidden = false;
+
+    // The 888 secret (发发发): 8 fast taps unlock a one-of-a-kind note.
+    let taps = [];
     let t = null;
     m.addEventListener("click", () => {
-      bubble.textContent = randItem(C.MASCOT_REACTIONS);
+      const now = Date.now();
+      taps = taps.filter((ts) => now - ts < 4000);
+      taps.push(now);
+      const jackpot = taps.length >= 8 && C.SECRET_888;
+      if (jackpot) {
+        taps = [];
+        try { localStorage.setItem(KEY, "1"); } catch (e) { /* ignore */ }
+        if (star) star.hidden = false;
+        m.classList.add("mascot--888");
+        bubble.textContent = C.SECRET_888;
+        bubble.classList.add("mascot__bubble--888");
+        if (window.MoEffects) window.MoEffects.confetti({ emoji: ["🧧", "✨", "🪙", "💛", "8️⃣"], count: 120 });
+      } else {
+        bubble.textContent = randItem(C.MASCOT_REACTIONS);
+        bubble.classList.remove("mascot__bubble--888");
+      }
       bubble.hidden = false;
       clearTimeout(t);
-      t = setTimeout(() => { bubble.hidden = true; }, 2500);
+      // The jackpot note is longer — leave it up long enough to read.
+      t = setTimeout(() => { bubble.hidden = true; }, jackpot ? 9000 : 2500);
     });
+  }
+
+  // ---------- Memory lane: our story, one lantern per milestone ----------
+  function initMemoryLane() {
+    const lane = document.getElementById("memory-lane");
+    if (!lane || !C.MILESTONES || !C.MILESTONES.length) return;
+    C.MILESTONES.forEach((ms) => {
+      const item = document.createElement("div");
+      item.className = "lane__item";
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "lane__lantern";
+      btn.innerHTML = `<span class="lane__glyph" aria-hidden="true">🏮</span><span class="lane__when">${ms.when}</span>`;
+      btn.setAttribute("aria-expanded", "false");
+      const card = document.createElement("div");
+      card.className = "lane__card";
+      card.hidden = true;
+      const scene = document.createElement("p");
+      scene.className = "lane__scene";
+      scene.textContent = ms.scene;
+      const note = document.createElement("p");
+      note.className = "lane__note";
+      note.textContent = ms.note;
+      card.appendChild(scene);
+      card.appendChild(note);
+      btn.addEventListener("click", () => {
+        const open = !card.hidden;
+        card.hidden = open;
+        btn.setAttribute("aria-expanded", String(!open));
+        btn.classList.toggle("lit", !open);
+      });
+      item.appendChild(btn);
+      item.appendChild(card);
+      lane.appendChild(item);
+    });
+  }
+
+  // ---------- Special days: the site remembers by itself ----------
+  // Test/preview hooks: ?mo-date=MM-DD or window.MO_DATE override today's date.
+  function initSpecialDays() {
+    const ribbon = document.getElementById("special-ribbon");
+    const banner = document.getElementById("special-banner");
+    const days = C.SPECIAL_DAYS;
+    if (!days || !days.length) return;
+
+    let mmdd = null;
+    try { mmdd = new URLSearchParams(location.search).get("mo-date"); } catch (e) { /* ignore */ }
+    mmdd = mmdd || window.MO_DATE || null;
+    const now = new Date();
+    const today = mmdd
+      ? new Date(now.getFullYear(), Number(mmdd.slice(0, 2)) - 1, Number(mmdd.slice(3, 5)))
+      : new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const key = String(today.getMonth() + 1).padStart(2, "0") + "-" + String(today.getDate()).padStart(2, "0");
+
+    const hit = days.find((d) => d.date === key);
+    if (hit) {
+      document.body.classList.add("party");
+      if (banner) {
+        banner.textContent = `${hit.emoji} ${hit.banner}`;
+        banner.hidden = false;
+      }
+      const hat = document.getElementById("mascot-hat");
+      if (hat) hat.hidden = false;
+      const daily = document.getElementById("daily-note");
+      if (daily && hit.note) daily.textContent = hit.note;
+      // One celebratory burst on arrival (no-ops under reduced motion).
+      setTimeout(() => {
+        if (window.MoEffects) { window.MoEffects.confetti(); window.MoEffects.petals(); }
+      }, 800);
+      return; // day-of takeover replaces the countdown ribbon
+    }
+
+    // Countdown ribbon: nearest special day within 14 days (handles year wrap).
+    if (!ribbon) return;
+    let soonest = null;
+    for (const d of days) {
+      const target = new Date(today.getFullYear(), Number(d.date.slice(0, 2)) - 1, Number(d.date.slice(3, 5)));
+      if (target < today) target.setFullYear(target.getFullYear() + 1);
+      const daysAway = Math.round((target - today) / 86400000);
+      if (daysAway > 0 && daysAway <= 14 && (!soonest || daysAway < soonest.daysAway)) {
+        soonest = { ...d, daysAway };
+      }
+    }
+    if (soonest) {
+      ribbon.textContent =
+        `${soonest.emoji} ${soonest.daysAway} day${soonest.daysAway === 1 ? "" : "s"} until ${soonest.label}…`;
+      ribbon.hidden = false;
+    }
   }
 
   // ---------- Wish lantern release (idea 1) ----------

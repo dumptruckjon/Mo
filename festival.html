@@ -27,13 +27,20 @@
   <!-- Released sky lanterns float up here. -->
   <div id="lantern-layer" aria-hidden="true"></div>
 
-  <!-- Lucky-cat mascot, tap for a reaction. -->
+  <!-- Lucky-cat mascot, tap for a reaction. (8 fast taps hide a secret…) -->
   <button class="mascot" id="mascot" type="button" aria-label="Lucky cat — tap me">
     <span class="mascot__cat" aria-hidden="true">🐱</span>
+    <span class="mascot__hat" id="mascot-hat" aria-hidden="true" hidden>🥳</span>
+    <span class="mascot__star" id="mascot-star" aria-hidden="true" hidden>⭐</span>
     <span class="mascot__bubble" id="mascot-bubble" hidden></span>
   </button>
 
   <main class="page">
+    <!-- Special-day countdown ribbon (shows within 14 days of a special date). -->
+    <div class="special-ribbon" id="special-ribbon" hidden></div>
+    <!-- Day-of takeover banner (birthday, anniversary, Valentine's…). -->
+    <div class="special-banner" id="special-banner" role="status" hidden></div>
+
     <header class="hero">
       <div class="lanterns" aria-hidden="true">🏮 🧧 🏮</div>
       <h1 class="hero__title">Hi&nbsp;Mo!</h1>
@@ -45,6 +52,13 @@
     <section class="card daily" aria-labelledby="daily-h">
       <h2 id="daily-h">💌 Today's note</h2>
       <p class="daily__text" id="daily-note">…</p>
+    </section>
+
+    <!-- Memory lane: our story, one lantern per milestone. -->
+    <section class="card lane-sec" aria-labelledby="lane-h">
+      <h2 id="lane-h">Our story, lantern by lantern 🏮</h2>
+      <p class="muted-hint">Tap a lantern to light up a memory.</p>
+      <div class="lane" id="memory-lane"></div>
     </section>
 
     <section class="stage" aria-live="polite">

@@ -77,6 +77,8 @@ test("the festival page has all required UI hooks", () => {
     'id="catch-stage"', 'id="catch-bowl"', 'id="catch-status"', 'id="catch-start"',
     'id="tea-grid"', 'id="tea-status"', 'id="tea-start"',
     'id="stack-stage"', 'id="stack-status"', 'id="stack-start"',
+    'id="memory-lane"', 'id="special-ribbon"', 'id="special-banner"',
+    'id="mascot-hat"', 'id="mascot-star"',
     'id="teller-options"', 'id="teller-result"', 'id="teller-reset"',
     'id="constellation"', 'id="constellation-msg"',
     'id="joke-zh"', 'id="joke-punch"', 'id="joke-pinyin"', 'id="joke-en"',
@@ -110,6 +112,25 @@ test("content for the new festival widgets is present", () => {
       `${key} should have >= ${min} entries, got ${content[key] && content[key].length}`);
     for (const v of content[key]) assert.ok(typeof v === "string" && v.length > 0, `empty entry in ${key}`);
   }
+});
+
+test("memory lane, special days, and the 888 secret have well-formed content", () => {
+  assert.ok(Array.isArray(content.MILESTONES) && content.MILESTONES.length >= 4,
+    "need at least 4 milestones");
+  for (const m of content.MILESTONES) {
+    assert.ok(m.when && m.scene && m.note, `milestone missing a field: ${JSON.stringify(m)}`);
+  }
+  assert.ok(Array.isArray(content.SPECIAL_DAYS) && content.SPECIAL_DAYS.length >= 3,
+    "need at least 3 special days");
+  for (const d of content.SPECIAL_DAYS) {
+    assert.match(d.date, /^\d{2}-\d{2}$/, `special day date must be MM-DD, got ${d.date}`);
+    assert.ok(d.label && d.emoji && d.banner && d.note, `special day missing a field: ${d.date}`);
+  }
+  // No two special days may collide on the same date.
+  const dates = content.SPECIAL_DAYS.map((d) => d.date);
+  assert.equal(new Set(dates).size, dates.length, "special-day dates must be unique");
+  assert.ok(typeof content.SECRET_888 === "string" && content.SECRET_888.length > 20,
+    "the 888 secret note should exist and be substantial");
 });
 
 test("shared effects + both pages load it", () => {
@@ -214,6 +235,7 @@ test("main.js wires up every feature", () => {
     "initLoveNoteDraw", "initWhack", "initTeller", "initConstellation", "initIdle",
     "initNoodleCatch", "initTeaCeremony", "initStack",
     "mo-catch-best", "mo-tea-best", "mo-stack-best",
+    "initMemoryLane", "initSpecialDays", "mo-888-found",
     "createFireworks", "reachZero", "mo-flower-count",
   ]) {
     assert.ok(js.includes(sym), `main.js missing ${sym}`);

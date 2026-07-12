@@ -123,8 +123,9 @@ tooling.
 │   ├── quiz.js                 # Quiz front-door logic (random 3-of-pool, restart, confetti). Reads window.MoContent.
 │   └── main.js                 # Festival behavior: daily note, countdown, fireworks, cookie, garden,
 │                               #   envelopes, memory, scratch, lantern, wheel, slot, whack, fortune-teller,
-│                               #   constellation, mascot, love-letter, intro, idle, noodle-catch,
-│                               #   tea-ceremony, dumpling-stack. Reads window.MoContent.
+│                               #   constellation, mascot (+888 secret), love-letter, intro, idle,
+│                               #   noodle-catch, tea-ceremony, dumpling-stack, memory-lane,
+│                               #   special-days. Reads window.MoContent.
 ├── tests/
 │   ├── site.test.js            # node:test unit/structure/logic tests (no browser)
 │   ├── e2e.test.js             # Playwright tests for the FESTIVAL (festival.html) — clicks every feature
@@ -184,6 +185,20 @@ loves (Chinese food, gardening, sweets):
   cheeky message from `content.js`, fire confetti on a new best, keep tap
   targets ≥ 44px, and never hijack page scroll (the catch stage only locks
   `touch-action` while a round is live).
+- **Memory lane** 🏮 — "our story, lantern by lantern": one lantern per real
+  milestone (from `MILESTONES` in `content.js` — **currently placeholders**;
+  Jon must fill in the real story). Tap a lantern to light it and unfold the
+  memory card.
+- **Special days** 🎂 — the site remembers by itself (`SPECIAL_DAYS` in
+  `content.js`, MM-DD keys — **birthday/anniversary dates are placeholders**,
+  01-01 and 03-03, until Jon provides the real ones). Within 14 days a countdown
+  ribbon shows ("🎂 9 days until Mo's birthday…", year-wrap handled); on the day
+  itself the festival takes over: banner, party hat on the mascot, occasion note
+  replacing the daily note, and a one-time confetti/petal burst. Test/preview
+  with `?mo-date=MM-DD` (or `window.MO_DATE`).
+- **The 888 secret** 🧧 — 8 fast taps on the lucky cat (8 = 发) trigger a gold
+  jackpot burst and reveal the one-of-a-kind `SECRET_888` note; once found, the
+  mascot permanently wears a tiny star (`mo-888-found` in localStorage).
 - **Ambient charm:** a tap-to-react **lucky-cat mascot** 🐱, a **typewriter love
   letter** on arrival, a **cinematic intro** when coming from the quiz, and an
   **idle butterfly** that drifts by when she lingers. Wins across the site share

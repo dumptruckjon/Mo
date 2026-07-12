@@ -462,6 +462,88 @@ test("dumpling stack: a timed drop lands, a wild one ends the game", async () =>
   assert.ok(await page.locator("#stack-start:not([hidden])").count(), "start button returns");
 });
 
+test("memory lane: a lantern per milestone; tapping lights it and reveals the memory", async () => {
+  const { MILESTONES } = require("../scripts/content.js");
+  const lanterns = page.locator("#memory-lane .lane__lantern");
+  assert.equal(await lanterns.count(), MILESTONES.length, "one lantern per milestone");
+  // All memory cards start closed.
+  assert.equal(await page.locator("#memory-lane .lane__card:not([hidden])").count(), 0);
+  await lanterns.first().scrollIntoViewIfNeeded();
+  await lanterns.first().click();
+  const firstCard = page.locator("#memory-lane .lane__card").first();
+  assert.ok(await firstCard.isVisible(), "tapping a lantern opens its memory card");
+  assert.equal((await firstCard.locator(".lane__note").textContent()).trim(), MILESTONES[0].note);
+  assert.ok(await lanterns.first().evaluate((el) => el.classList.contains("lit")), "lantern lights up");
+  // Tapping again closes it.
+  await lanterns.first().click();
+  assert.ok(!(await firstCard.isVisible()), "second tap closes the card");
+});
+
+test("special day: day-of takeover shows the banner, hat, and occasion note", async () => {
+  const { SPECIAL_DAYS } = require("../scripts/content.js");
+  const day = SPECIAL_DAYS[0];
+  const ctx = await browser.newContext();
+  try {
+    const p = await ctx.newPage();
+    await p.goto(baseURL + "festival.html?mo-date=" + day.date, { waitUntil: "load" });
+    await p.waitForSelector("#special-banner:not([hidden])", { timeout: 4000 });
+    assert.ok((await p.textContent("#special-banner")).includes(day.banner), "banner shows the occasion");
+    assert.ok(await p.evaluate(() => document.body.classList.contains("party")), "party mode is on");
+    assert.ok(await p.locator("#mascot-hat:not([hidden])").count(), "the mascot wears a party hat");
+    assert.equal((await p.textContent("#daily-note")).trim(), day.note, "daily note is the occasion note");
+    assert.equal(await p.locator("#special-ribbon:not([hidden])").count(), 0, "no countdown ribbon on the day");
+  } finally {
+    await ctx.close();
+  }
+});
+
+test("special day: countdown ribbon appears within 14 days (incl. year wrap) and not otherwise", async () => {
+  const ctx = await browser.newContext();
+  try {
+    const p = await ctx.newPage();
+    // 12-29 is 3 days before the placeholder 01-01 birthday — crosses the year boundary.
+    await p.goto(baseURL + "festival.html?mo-date=12-29", { waitUntil: "load" });
+    await p.waitForSelector("#special-ribbon:not([hidden])", { timeout: 4000 });
+    const ribbon = await p.textContent("#special-ribbon");
+    assert.match(ribbon, /3 days until/, `ribbon should say 3 days, got: ${ribbon}`);
+    assert.equal(await p.locator("#special-banner:not([hidden])").count(), 0, "no takeover before the day");
+    // A date far from every special day shows neither ribbon nor banner.
+    await p.goto(baseURL + "festival.html?mo-date=07-20", { waitUntil: "load" });
+    await p.waitForTimeout(400);
+    assert.equal(await p.locator("#special-ribbon:not([hidden])").count(), 0, "no ribbon far out");
+    assert.equal(await p.locator("#special-banner:not([hidden])").count(), 0, "no banner far out");
+  } finally {
+    await ctx.close();
+  }
+});
+
+test("888 secret: eight fast mascot taps reveal the jackpot note and a lasting star", async () => {
+  const { SECRET_888 } = require("../scripts/content.js");
+  const ctx = await browser.newContext();
+  try {
+    const p = await ctx.newPage();
+    await p.goto(baseURL + "festival.html", { waitUntil: "load" });
+    assert.equal(await p.locator("#mascot-star:not([hidden])").count(), 0, "star hidden before discovery");
+    // Seven taps: still just normal reactions.
+    for (let i = 0; i < 7; i++) await p.locator("#mascot").click({ force: true });
+    let bubble = (await p.textContent("#mascot-bubble")).trim();
+    assert.notEqual(bubble, SECRET_888, "no jackpot before the 8th tap");
+    // The 8th fast tap triggers the jackpot.
+    await p.locator("#mascot").click({ force: true });
+    await p.waitForFunction(
+      (secret) => document.getElementById("mascot-bubble").textContent === secret,
+      SECRET_888, { timeout: 2000 }
+    );
+    assert.ok(await p.locator("#mascot-star:not([hidden])").count(), "the star appears");
+    assert.equal(await p.evaluate(() => localStorage.getItem("mo-888-found")), "1");
+    // The star survives a reload.
+    await p.reload({ waitUntil: "load" });
+    await p.waitForSelector("#mascot-star:not([hidden])", { timeout: 3000 });
+  } finally {
+    await ctx.close();
+  }
+});
+
 test("no uncaught page errors occurred during interaction", () => {
   assert.deepEqual(pageErrors, [], `page errors: ${pageErrors.join("; ")}`);
 });

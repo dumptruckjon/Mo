@@ -498,6 +498,97 @@ body {
   border-radius: 12px;
   box-shadow: var(--shadow);
 }
+/* Party hat (special days) + the tiny permanent star once 888 is found. */
+.mascot__hat {
+  position: absolute;
+  top: -14px; left: 50%;
+  transform: translateX(-50%) rotate(-12deg);
+  font-size: 1.3rem;
+  pointer-events: none;
+}
+.mascot__star {
+  position: absolute;
+  top: -2px; right: -2px;
+  font-size: 0.9rem;
+  filter: drop-shadow(0 0 4px var(--gold));
+  pointer-events: none;
+}
+.mascot--888 .mascot__cat { animation: pop 0.4s ease; }
+.mascot__bubble--888 { border: 2px solid var(--crimson); font-size: 0.9rem; }
+
+/* ---------- Special days (ribbon + day-of takeover) ---------- */
+.special-ribbon {
+  margin: 0 0 0.9rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 210, 77, 0.6);
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--gold);
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+}
+.special-banner {
+  margin: 0 0 1rem;
+  padding: 0.85rem 1rem;
+  border-radius: 16px;
+  border: 2px solid var(--gold);
+  background: linear-gradient(135deg, rgba(255, 210, 77, 0.25), rgba(255, 45, 85, 0.2));
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 1.05rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+}
+body.party .hero__title { text-shadow: 0 0 18px var(--gold); }
+
+/* ---------- Memory lane (our story) ---------- */
+.lane {
+  position: relative;
+  max-width: 30rem;
+  margin: 0 auto;
+  padding-left: 6px;
+  text-align: left;
+}
+.lane::before {
+  content: "";
+  position: absolute;
+  left: 27px; top: 10px; bottom: 10px;
+  width: 2px;
+  background: linear-gradient(rgba(255, 210, 77, 0.7), rgba(255, 210, 77, 0.15));
+  pointer-events: none;
+}
+.lane__item { position: relative; margin-bottom: 0.35rem; }
+.lane__lantern {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  border-radius: 12px;
+  background: none;
+  color: var(--ink);
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+.lane__glyph { font-size: 1.7rem; filter: grayscale(0.7) brightness(0.8); transition: filter 0.3s; }
+.lane__lantern.lit .lane__glyph { filter: none; text-shadow: 0 0 14px var(--gold); }
+.lane__lantern.lit .lane__when { color: var(--gold); }
+.lane__card {
+  margin: 0 0 0.7rem 44px;
+  padding: 0.6rem 0.8rem;
+  border-left: 2px solid var(--gold);
+  border-radius: 0 12px 12px 0;
+  background: rgba(0, 0, 0, 0.25);
+}
+.lane__scene { margin: 0 0 0.3rem; font-size: 1.4rem; letter-spacing: 0.2rem; }
+.lane__note { margin: 0; font-size: 0.95rem; line-height: 1.45; }
 
 /* ---------- Wish lanterns (idea 1) ---------- */
 #lantern-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
