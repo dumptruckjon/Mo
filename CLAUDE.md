@@ -132,6 +132,8 @@ tooling.
 │   ├── quiz.test.js            # Playwright tests for the QUIZ (index.html) — pass/fail/restart/prize
 │   ├── mobile.test.js          # Playwright iPhone tests (real WebKit in CI) — touch + responsive layout
 │   └── helpers.js              # shared: locate a browser + serve the site (or MO_BASE_URL for live)
+├── docs/
+│   └── NEXT_PROJECT_BOOTSTRAP.md  # Distilled learnings/setup/guardrails to bootstrap the next site
 ├── package.json                # `npm test` → `node --test` (runs unit + e2e)
 ├── package-lock.json           # committed for reproducible `npm ci` in CI
 ├── .gitignore                  # ignores node_modules etc.
